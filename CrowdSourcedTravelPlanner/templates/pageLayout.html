@@ -17,6 +17,12 @@
     {% elif request.endpoint == 'register' %}
         <title>Register</title>
         <link href="{{ url_for('static', filename='register.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'profile' %}
+        <title>Register</title>
+        <link href="{{ url_for('static', filename='profile.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'account' %}
+        <title>Register</title>
+        <link href="{{ url_for('static', filename='account.css') }}" rel="stylesheet" type="text/css">
     {% endif %}
 
 </head>
@@ -47,6 +53,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('profile') }}">My Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('account') }}">My Account</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">Log Out</a>
