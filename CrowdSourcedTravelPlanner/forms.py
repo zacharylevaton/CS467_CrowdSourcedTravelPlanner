@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from CrowdSourcedTravelPlanner.models import User
 from flask_login import current_user
@@ -70,3 +70,12 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email address is taken. Please enter a different one.')
+
+
+class ExperienceForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
+    rating = StringField('Rating', validators=[DataRequired()])
+    picture = FileField('Upload Experience Picture', validators=[FileAllowed(['jpg', 'png'])])
+    submit = SubmitField('Post')

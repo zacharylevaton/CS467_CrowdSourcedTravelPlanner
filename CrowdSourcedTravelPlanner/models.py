@@ -22,22 +22,27 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
-    posts = db.relationship('Post', backref='author', lazy=True)
+    date_account_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    experiences = db.relationship('Experience', backref='author', lazy=True)
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"
 
 
-class Post(db.Model):
+class Experience(db.Model):
     """
-    This class is a leftover from the Flask Tutorial videos and is currently only used for testing.
-    It will be converted to the database table for "Experiences" later.
+    Defines the database attributes for the site's users.  This class is only for testing before switching over to the
+    real database.
+    TODO Description
     """
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    rating = db.Column(db.String(10), nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    content = db.Column(db.Text, nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
-        return f"User('{self.title}', '{self.date_posted}')"
+        return f"Experience('{self.title}', '{self.date_posted}')"

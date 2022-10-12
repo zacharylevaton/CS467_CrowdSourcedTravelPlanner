@@ -1,6 +1,6 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
 from flask import render_template, url_for, flash, redirect, request
-from CrowdSourcedTravelPlanner.models import User, Post
+from CrowdSourcedTravelPlanner.models import User, Experience
 from flask_login import login_user, current_user, logout_user, login_required
 import os
 import secrets
@@ -11,7 +11,8 @@ from PIL import Image
 @app.route('/')
 @app.route("/landing")
 def landing():
-    return render_template('landing.html')
+    experiences = Experience.query.all()
+    return render_template('landing.html', experiences=experiences)
 
 
 # Register page
@@ -96,7 +97,7 @@ def profile():
 def save_profile_picture(form_picture):
     """Saves a user-uploaded image to the profile pictures folder and gives it a random filename."""
     random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)     # Get the original extension of the uploaded image
+    _, f_ext = os.path.splitext(form_picture.filename)  # Get the original extension of the uploaded image
     picture_fn = random_hex + f_ext
 
     # Save the image file to the pictures folder
@@ -135,3 +136,53 @@ def account():
 
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='My Account', image_file=image_file, form=form)
+
+
+def save_experience_picture(form_picture):
+    """Saves a user-uploaded image to the Experience pictures folder and gives it a random filename."""
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)  # Get the original extension of the uploaded image
+    picture_fn = random_hex + f_ext
+
+    # Save the image file to the pictures folder
+    picture_path = os.path.join(app.root_path, 'static/experience_pics', picture_fn)
+
+    # Resize large images before saving
+    output_size = (500, 500)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    # Return the filename of the newly saved image
+    return picture_fn
+
+
+@app.route("/experience/add", methods=['GET', 'POST'])
+@login_required
+def add_experience():
+    form = forms.ExperienceForm()
+
+    if form.validate_on_submit():
+        # Save the user-uploaded image to the file system
+        if form.picture.data:
+            picture_file = save_experience_picture(form.picture.data)
+        else:
+            picture_file = 'default.jpg'
+
+        # Create a new Experience object and set the author to the current user
+        experience = Experience(title=form.title.data, location=form.location.data, description=form.description.data,
+                                rating=form.rating.data, image_file=picture_file, author=current_user)
+        db.session.add(experience)
+        db.session.commit()
+
+        # Redirect to the Landing page after successful Experience creation
+        flash('Your Experience has been created!', 'success')
+        return redirect(url_for('landing'))
+
+    return render_template('create_experience.html', title='New Experience', form=form)
+
+
+@app.route("/experience/<int:experience_id>")
+def experience(experience_id):
+    experience = Experience.query.get_or_404(experience_id)
+    return render_template('experience.html', title=experience.title, experience=experience)

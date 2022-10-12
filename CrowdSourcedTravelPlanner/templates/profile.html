@@ -7,6 +7,7 @@
         <div class="media-body">
           <h2 class="account-heading">{{ current_user.username }}</h2>
           <p class="text-secondary">{{ current_user.email }}</p>
+          <p class="text-secondary">Member since {{ current_user.date_account_created.strftime('%Y') }}</p>
         </div>
       </div>
     </div>
