@@ -1,5 +1,5 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, abort
 from CrowdSourcedTravelPlanner.models import User, Experience
 from flask_login import login_user, current_user, logout_user, login_required
 import os
@@ -90,8 +90,10 @@ def logout():
 @app.route("/profile")
 @login_required
 def profile():
+    experiences = Experience.query.all()
+
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('profile.html', title='My Profile', image_file=image_file)
+    return render_template('profile.html', title='My Profile', image_file=image_file, experiences=experiences)
 
 
 def save_profile_picture(form_picture):
@@ -161,6 +163,7 @@ def save_experience_picture(form_picture):
 @login_required
 def add_experience():
     form = forms.ExperienceForm()
+    display_image = 'default.jpg'
 
     if form.validate_on_submit():
         # Save the user-uploaded image to the file system
@@ -179,10 +182,69 @@ def add_experience():
         flash('Your Experience has been created!', 'success')
         return redirect(url_for('landing'))
 
-    return render_template('create_experience.html', title='New Experience', form=form)
+    return render_template('create_experience.html', title='Add Experience', form=form, legend='Add Experience',
+                           display_image=display_image)
 
 
 @app.route("/experience/<int:experience_id>")
 def experience(experience_id):
     experience = Experience.query.get_or_404(experience_id)
     return render_template('experience.html', title=experience.title, experience=experience)
+
+
+@app.route("/experience/<int:experience_id>/update", methods=['GET', 'POST'])
+@login_required
+def update_experience(experience_id):
+    experience = Experience.query.get_or_404(experience_id)
+    display_image = experience.image_file
+
+    # Make sure only the Experience's author can update it
+    if experience.author != current_user:
+        abort(403)
+
+    form = forms.ExperienceForm()
+
+    # Update the Experience details after form submission
+    if form.validate_on_submit():
+        # If the user updates the Experience image, save it to the file system
+        if form.picture.data:
+            picture_file = save_experience_picture(form.picture.data)
+            experience.image_file = picture_file
+
+        experience.title = form.title.data
+        experience.description = form.description.data
+        experience.location = form.location.data
+        experience.rating = form.rating.data
+        db.session.commit()
+        flash('Your Experience has been updated!', 'success')
+        return redirect(url_for('experience', experience_id=experience.id))
+    elif request.method == 'GET':
+        # Populate form with existing values
+        form.title.data = experience.title
+        form.description.data = experience.description
+        form.location.data = experience.location
+        form.rating.data = experience.rating
+
+    return render_template('create_experience.html', title='Update Experience', form=form, legend='Update Experience',
+                           display_image=display_image)
+
+
+@app.route("/experience/<int:experience_id>/delete", methods=['POST'])
+@login_required
+def delete_experience(experience_id):
+
+    # Note: The Delete Experience function is not working yet.  I set up the "Delete" button as described in the Flask
+    # Tutorial video 8 (https://www.youtube.com/watch?v=u0oDDZrDz9U&t=2280s) but the Bootstrap modal doesn't appear.
+    # TODO: Fix CSS/Bootstrap modal for Delete button
+
+    experience = Experience.query.get_or_404(experience_id)
+
+    # Make sure only the Experience's author can delete it
+    if experience.author != current_user:
+        abort(403)
+
+    # Delete the Experience and redirect to the Landing page
+    db.session.delete(experience)
+    db.session.commit()
+    flash('Your Experience has been deleted!', 'success')
+    return redirect(url_for('landing'))

@@ -11,4 +11,26 @@
         </div>
       </div>
     </div>
+    <legend class="border-bottom mb-3">My Experiences</legend>
+    {% for experience in experiences %}
+        {% if experience.author == current_user %}
+            <article class="media content-section">
+                <img class="rounded-circle article-img"
+                     src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="#">{{ experience.author.username }}</a>
+                        <small class="text-muted">{{ experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
+                    </div>
+                    <h2><a class="article-title"
+                           href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a></h2>
+                    <img class="img-rounded"
+                     src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
+                    <p class="article-content pt-3">{{ experience.description }}</p>
+                    <p class="article-content">Location: {{ experience.location }}</p>
+                    <p class="article-content">Rating: {{ experience.rating }}</p>
+                </div>
+            </article>
+        {% endif %}
+    {% endfor %}
 {% endblock content %}}

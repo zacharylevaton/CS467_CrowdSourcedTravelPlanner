@@ -5,7 +5,7 @@
         <form method="POST" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Add Experience</legend>
+                <legend class="border-bottom mb-4">{{ legend }}</legend>
                 <div class="form-group">
                     {{ form.title.label(class="form-control-label") }}
                     {% if form.title.errors %}
@@ -32,7 +32,7 @@
                         {{ form.description(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <div class="form-group">
+                <div class="form-group pt-3">
                     {{ form.location.label(class="form-control-label") }}
                     {% if form.location.errors %}
                         {{ form.location(class="form-control form-control-lg is-invalid") }}
@@ -45,7 +45,7 @@
                         {{ form.location(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <div class="form-group">
+                <div class="form-group pt-3 pb-4">
                     {{ form.rating.label(class="form-control-label") }}
                     {% if form.rating.errors %}
                         {{ form.rating(class="form-control form-control-lg is-invalid") }}
@@ -58,6 +58,12 @@
                         {{ form.rating(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+                <!-- Show preview of the Experience's current image, or default image for the "Add Experience" page -->
+                {% if display_image == 'default.jpg' %}
+                    <p>Default Image</p>
+                {% endif %}
+                <img class="img-rounded"
+                 src="{{ url_for('static', filename='experience_pics/' + display_image) }}">
                 <!-- Upload a custom image for the Experience -->
                 <div class="form-group pt-3">
                     {{ form.picture.label() }}

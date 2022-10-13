@@ -29,6 +29,9 @@
     {% elif request.endpoint == 'experience' %}
         <title>Experience Details</title>
         <link href="{{ url_for('static', filename='experience.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'update_experience' %}
+        <title>Update Experience</title>
+        <link href="{{ url_for('static', filename='update_experience.css') }}" rel="stylesheet" type="text/css">
     {% endif %}
 
 </head>
