@@ -11,7 +11,8 @@ from PIL import Image
 @app.route('/')
 @app.route("/landing")
 def landing():
-    experiences = Experience.query.all()
+    # Get all experiences and sort by date created in descending order
+    experiences = db.session.query(Experience).order_by(Experience.date_posted.desc())
     return render_template('landing.html', experiences=experiences)
 
 
@@ -90,10 +91,13 @@ def logout():
 @app.route("/profile")
 @login_required
 def profile():
-    experiences = Experience.query.all()
+    # Get all the experiences created by the currently logged-in user
+    experiences = db.session.query(Experience).filter(Experience.author == current_user)
+    exp_count = experiences.count()
 
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('profile.html', title='My Profile', image_file=image_file, experiences=experiences)
+    return render_template('profile.html', title='My Profile', image_file=image_file, experiences=experiences,
+                           exp_count=exp_count)
 
 
 def save_profile_picture(form_picture):
@@ -233,9 +237,8 @@ def update_experience(experience_id):
 @login_required
 def delete_experience(experience_id):
 
-    # Note: The Delete Experience function is not working yet.  I set up the "Delete" button as described in the Flask
-    # Tutorial video 8 (https://www.youtube.com/watch?v=u0oDDZrDz9U&t=2280s) but the Bootstrap modal doesn't appear.
-    # TODO: Fix CSS/Bootstrap modal for Delete button
+    # Edit: Delete button now works.  The Bootstrap fix is described in
+    # https://stackoverflow.com/questions/65406733/bootstrap-modal-not-popping-up-when-clicking-button
 
     experience = Experience.query.get_or_404(experience_id)
 

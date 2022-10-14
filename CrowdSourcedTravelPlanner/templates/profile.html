@@ -2,35 +2,34 @@
 
 {% block content %}
     <div class="content-section">
-      <div class="media">
-        <img class="rounded-circle account-img" src="{{ image_file }}">
-        <div class="media-body">
-          <h2 class="account-heading">{{ current_user.username }}</h2>
-          <p class="text-secondary">{{ current_user.email }}</p>
-          <p class="text-secondary">Member since {{ current_user.date_account_created.strftime('%Y') }}</p>
+        <div class="media">
+            <img class="rounded-circle account-img" src="{{ image_file }}">
+            <div class="media-body">
+                <h2 class="account-heading">{{ current_user.username }}</h2>
+                <p class="text-secondary">{{ current_user.email }}</p>
+                <p class="text-secondary">Member since {{ current_user.date_account_created.strftime('%Y') }}</p>
+                <p class="text-secondary">Experiences Created: {{ exp_count }}</p>
+            </div>
         </div>
-      </div>
     </div>
     <legend class="border-bottom mb-3">My Experiences</legend>
     {% for experience in experiences %}
-        {% if experience.author == current_user %}
-            <article class="media content-section">
-                <img class="rounded-circle article-img"
-                     src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
-                <div class="media-body">
-                    <div class="article-metadata">
-                        <a class="mr-2" href="#">{{ experience.author.username }}</a>
-                        <small class="text-muted">{{ experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
-                    </div>
-                    <h2><a class="article-title"
-                           href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a></h2>
-                    <img class="img-rounded"
-                     src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
-                    <p class="article-content pt-3">{{ experience.description }}</p>
-                    <p class="article-content">Location: {{ experience.location }}</p>
-                    <p class="article-content">Rating: {{ experience.rating }}</p>
+        <article class="media content-section">
+            <img class="rounded-circle article-img"
+                 src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-2" href="#">{{ experience.author.username }}</a>
+                    <small class="text-muted">{{ experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
                 </div>
-            </article>
-        {% endif %}
+                <h2><a class="article-title"
+                       href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a></h2>
+                <img class="img-rounded"
+                     src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
+                <p class="article-content pt-3">{{ experience.description }}</p>
+                <p class="article-content">Location: {{ experience.location }}</p>
+                <p class="article-content">Rating: {{ experience.rating }}</p>
+            </div>
+        </article>
     {% endfor %}
 {% endblock content %}}
