@@ -31,8 +31,7 @@ class User(db.Model, UserMixin):
 
 class Experience(db.Model):
     """
-    Defines the database attributes for the site's users.  This class is only for testing before switching over to the
-    real database.
+    Temporary class for testing Experiences before switching over to the real database.
     TODO Description
     """
     id = db.Column(db.Integer, primary_key=True)
@@ -43,6 +42,8 @@ class Experience(db.Model):
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    latitude = db.Column(db.String(20), nullable=True)  # Temporarily nullable for now while I'm testing
+    longitude = db.Column(db.String(20), nullable=True)  # Re-evaluate later
 
     def __repr__(self):
         return f"Experience('{self.title}', '{self.date_posted}')"

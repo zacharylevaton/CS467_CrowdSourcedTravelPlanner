@@ -5,6 +5,8 @@ from flask_login import login_user, current_user, logout_user, login_required
 import os
 import secrets
 from PIL import Image
+import requests
+import urllib.parse
 
 
 # Landing page
@@ -163,6 +165,18 @@ def save_experience_picture(form_picture):
     return picture_fn
 
 
+def get_geolocation(address):
+    """
+    Returns a tuple of the latitude and longitude of the received address string.  Queries the Open Street Map database
+    as described in https://stackoverflow.com/questions/25888396/how-to-get-latitude-longitude-with-python.
+    """
+    url = 'https://nominatim.openstreetmap.org/search/' + urllib.parse.quote(address) +'?format=json'
+
+    response = requests.get(url).json()
+
+    return response[0]["lat"], response[0]["lon"]
+
+
 @app.route("/experience/add", methods=['GET', 'POST'])
 @login_required
 def add_experience():
@@ -179,6 +193,15 @@ def add_experience():
         # Create a new Experience object and set the author to the current user
         experience = Experience(title=form.title.data, location=form.location.data, description=form.description.data,
                                 rating=form.rating.data, image_file=picture_file, author=current_user)
+
+        # Get the latitude and longitude of the address entered on the form
+        geolocation = get_geolocation(experience.location)
+        # Update the Experience with the latitude and longitude if values are found
+        if geolocation:
+            experience.latitude = geolocation[0]
+            experience.longitude = geolocation[1]
+
+        # Add the new Experience to the database
         db.session.add(experience)
         db.session.commit()
 
@@ -219,6 +242,14 @@ def update_experience(experience_id):
         experience.description = form.description.data
         experience.location = form.location.data
         experience.rating = form.rating.data
+
+        # Get the latitude and longitude of the address entered on the form
+        geolocation = get_geolocation(experience.location)
+        # Update the Experience with the latitude and longitude if values are found
+        if geolocation:
+            experience.latitude = geolocation[0]
+            experience.longitude = geolocation[1]
+
         db.session.commit()
         flash('Your Experience has been updated!', 'success')
         return redirect(url_for('experience', experience_id=experience.id))

@@ -21,6 +21,10 @@
                  src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
             <p class="article-content pt-3">{{ experience.description }}</p>
             <p class="article-content">Location: {{ experience.location }}</p>
+            <!-- Display geolocation if values exist for latitude and longitude -->
+            {% if experience.latitude and experience.longitude %}
+                <p class="article-content">Geo-location (Lat, Long): {{ experience.latitude }}, {{ experience.longitude }}</p>
+            {% endif %}
             <p class="article-content">Rating: {{ experience.rating }}</p>
         </div>
     </article>
