@@ -1,7 +1,7 @@
 {% extends "pageLayout.html" %}
 
 {% block content %}
-    <legend class="border-bottom mb-3">Recently Added Experiences</legend>
+    <legend class="border-bottom mb-4">Experiences by {{ user.username }} ({{ experiences.total }})</legend>
     {% for experience in experiences.items %}
         <article class="media content-section">
             <img class="rounded-circle article-img"
@@ -29,9 +29,9 @@
     {% for page_num in experiences.iter_pages() %}
         {% if page_num %}
             {% if experiences.page == page_num %}
-                <a class="btn btn-secondary mb-4" href="{{ url_for('landing', page=page_num) }}">{{ page_num }}</a>
+                <a class="btn btn-secondary mb-4" href="{{ url_for('user_experiences', username=user.username, page=page_num) }}">{{ page_num }}</a>
             {% else %}
-                <a class="btn btn-outline-secondary mb-4" href="{{ url_for('landing', page=page_num) }}">{{ page_num }}</a>
+                <a class="btn btn-outline-secondary mb-4" href="{{ url_for('user_experiences', username=user.username, page=page_num) }}">{{ page_num }}</a>
             {% endif %}
         {% else %}
             ...

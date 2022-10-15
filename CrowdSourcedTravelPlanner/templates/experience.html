@@ -6,7 +6,7 @@
              src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
         <div class="media-body">
             <div class="article-metadata">
-                <a class="mr-2" href="#">{{ experience.author.username }}</a>
+                <a class="mr-2" href="{{ url_for('user_experiences', username=experience.author.username) }}">{{ experience.author.username }}</a>
                 <small class="text-muted">{{ experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
                 {% if experience.author == current_user %}
                     <div>

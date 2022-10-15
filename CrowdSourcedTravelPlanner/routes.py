@@ -13,8 +13,11 @@ import urllib.parse
 @app.route('/')
 @app.route("/landing")
 def landing():
+    # Set page number for pagination
+    page = request.args.get('page', 1, type=int)
+
     # Get all experiences and sort by date created in descending order
-    experiences = db.session.query(Experience).order_by(Experience.date_posted.desc())
+    experiences = Experience.query.order_by(Experience.date_posted.desc()).paginate(page=page, per_page=5)
     return render_template('landing.html', experiences=experiences)
 
 
@@ -94,7 +97,7 @@ def logout():
 @login_required
 def profile():
     # Get all the experiences created by the currently logged-in user
-    experiences = db.session.query(Experience).filter(Experience.author == current_user)
+    experiences = Experience.query.filter(Experience.author == current_user)
     exp_count = experiences.count()
 
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
@@ -121,6 +124,7 @@ def save_profile_picture(form_picture):
     return picture_fn
 
 
+# My Account page
 @app.route("/account", methods=['GET', 'POST'])
 @login_required
 def account():
@@ -177,6 +181,7 @@ def get_geolocation(address):
     return response[0]["lat"], response[0]["lon"]
 
 
+# Add Experience page
 @app.route("/experience/add", methods=['GET', 'POST'])
 @login_required
 def add_experience():
@@ -213,12 +218,14 @@ def add_experience():
                            display_image=display_image)
 
 
+# Experience Details page
 @app.route("/experience/<int:experience_id>")
 def experience(experience_id):
     experience = Experience.query.get_or_404(experience_id)
     return render_template('experience.html', title=experience.title, experience=experience)
 
 
+# Update Experience page
 @app.route("/experience/<int:experience_id>/update", methods=['GET', 'POST'])
 @login_required
 def update_experience(experience_id):
@@ -264,6 +271,7 @@ def update_experience(experience_id):
                            display_image=display_image)
 
 
+# Delete Experience button
 @app.route("/experience/<int:experience_id>/delete", methods=['POST'])
 @login_required
 def delete_experience(experience_id):
@@ -282,3 +290,19 @@ def delete_experience(experience_id):
     db.session.commit()
     flash('Your Experience has been deleted!', 'success')
     return redirect(url_for('landing'))
+
+
+# User Experiences page
+@app.route("/user/<string:username>")
+def user_experiences(username):
+    # Set page number for pagination
+    page = request.args.get('page', 1, type=int)
+
+    # Find the username of the User
+    user = User.query.filter_by(username=username).first_or_404()
+
+    # Query for all the Experiences created by the selected user
+    experiences = Experience.query.filter_by(author=user)\
+        .order_by(Experience.date_posted.desc())\
+        .paginate(page=page, per_page=5)
+    return render_template('user_experiences.html', experiences=experiences, user=user)
