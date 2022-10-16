@@ -174,7 +174,7 @@ def get_geolocation(address):
     Returns a tuple of the latitude and longitude of the received address string.  Queries the Open Street Map database
     as described in https://stackoverflow.com/questions/25888396/how-to-get-latitude-longitude-with-python.
     """
-    url = 'https://nominatim.openstreetmap.org/search/' + urllib.parse.quote(address) +'?format=json'
+    url = 'https://nominatim.openstreetmap.org/search/' + urllib.parse.quote(address) + '?format=json'
 
     response = requests.get(url).json()
 
@@ -275,7 +275,6 @@ def update_experience(experience_id):
 @app.route("/experience/<int:experience_id>/delete", methods=['POST'])
 @login_required
 def delete_experience(experience_id):
-
     # Edit: Delete button now works.  The Bootstrap fix is described in
     # https://stackoverflow.com/questions/65406733/bootstrap-modal-not-popping-up-when-clicking-button
 
@@ -302,7 +301,37 @@ def user_experiences(username):
     user = User.query.filter_by(username=username).first_or_404()
 
     # Query for all the Experiences created by the selected user
-    experiences = Experience.query.filter_by(author=user)\
-        .order_by(Experience.date_posted.desc())\
+    experiences = Experience.query.filter_by(author=user) \
+        .order_by(Experience.date_posted.desc()) \
         .paginate(page=page, per_page=5)
     return render_template('user_experiences.html', experiences=experiences, user=user)
+
+
+# Search Experiences
+@app.route("/search", methods=['GET', 'POST'])
+def search():
+    form = forms.SearchForm()
+
+    # Display results after submitting Search form
+    if form.validate_on_submit():
+        search_type = form.search_type.data
+        search_string = form.search_string.data
+
+        # Set page number for pagination
+        page = request.args.get('page', 1, type=int)
+
+        # Get Experience results depending on whether search is by location or keyword
+        if search_type == 'location':
+            experiences = Experience.query.filter(Experience.location.like('%' + search_string + '%')) \
+                .order_by(Experience.title) \
+                .paginate(page=page, per_page=5)
+        if search_type == 'keyword':    # Returning results by location for now until keywords are implemented
+            experiences = Experience.query.filter(Experience.location.like('%' + search_string + '%')) \
+                .order_by(Experience.title) \
+                .paginate(page=page, per_page=5)
+
+        return render_template('search_results.html', experiences=experiences, search_type=search_type,
+                               search_string=search_string)
+
+    # Render original Search form
+    return render_template('search.html', form=form)

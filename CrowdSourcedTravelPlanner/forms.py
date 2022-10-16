@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from CrowdSourcedTravelPlanner.models import User
 from flask_login import current_user
@@ -79,3 +79,9 @@ class ExperienceForm(FlaskForm):
     rating = StringField('Rating', validators=[DataRequired()])
     picture = FileField('Upload Experience Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Post')
+
+
+class SearchForm(FlaskForm):
+    search_type = SelectField('Search by', choices=[('location', 'Location'), ('keyword', 'Keyword')])
+    search_string = StringField('Search String', validators=[DataRequired()])
+    submit = SubmitField('Search')

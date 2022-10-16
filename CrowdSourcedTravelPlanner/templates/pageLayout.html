@@ -35,6 +35,9 @@
     {% elif request.endpoint == 'user_experiences' %}
         <title>User Experiences</title>
         <link href="{{ url_for('static', filename='user_experiences.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'search' %}
+        <title>User Experiences</title>
+        <link href="{{ url_for('static', filename='search.css') }}" rel="stylesheet" type="text/css">
     {% endif %}
 
 </head>
@@ -51,7 +54,7 @@
                     <a class="nav-link" href="{{ url_for('landing') }}">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Search Experiences</a>
+                    <a class="nav-link" href="{{ url_for('search') }}">Search Experiences</a>
                 </li>
                 <!-- TODO: After implementing login persistence, complete following changes:
                     - Update navbar to include "Add Experience"
