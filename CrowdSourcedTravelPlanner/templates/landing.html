@@ -1,6 +1,44 @@
 {% extends "pageLayout.html" %}
 
 {% block content %}
+    {% if current_user.is_authenticated and current_user.location != "" %}
+        <legend class="border-bottom mb-3">Experiences Near Me</legend>
+        {% for nearby_experience in nearby_experiences.items %}
+            <article class="media content-section">
+                <img class="rounded-circle article-img"
+                    src="{{ url_for('static', filename='profile_pics/' + nearby_experience.author.image_file) }}">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="{{ url_for('user_experiences', username=nearby_experience.author.username) }}">{{ nearby_experience.author.username }}</a>
+                        <small class="text-muted">{{ nearby_experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
+                    </div>
+                    <h2><a class="article-title"
+                        href="{{ url_for('experience', experience_id=nearby_experience.id) }}">{{ nearby_experience.title }}</a></h2>
+                    <img class="img-rounded"
+                    src="{{ url_for('static', filename='experience_pics/' + nearby_experience.image_file) }}">
+                    <p class="article-content pt-3">{{ nearby_experience.description }}</p>
+                    <p class="article-content">Location: {{ nearby_experience.location }}</p>
+                    <!-- Display geolocation if values exist for latitude and longitude -->
+                    {% if nearby_experience.latitude and nearby_experience.longitude %}
+                        <p class="article-content">Geo-location (Lat, Long): {{ nearby_experience.latitude }}, {{ nearby_experience.longitude }}</p>
+                    {% endif %}
+                    <p class="article-content">Rating: {{ nearby_experience.rating }}</p>
+                </div>
+            </article>
+        {% endfor %}
+        <!-- Pagination setup -->
+        {% for nearby_page_num in nearby_experiences.iter_pages() %}
+            {% if nearby_page_num %}
+                {% if nearby_experiences.page == nearby_page_num %}
+                    <a class="btn btn-secondary mb-4" href="{{ url_for('landing', nearby_page=nearby_page_num) }}">{{ nearby_page_num }}</a>
+                {% else %}
+                    <a class="btn btn-outline-secondary mb-4" href="{{ url_for('landing', nearby_page=nearby_page_num) }}">{{ nearby_page_num }}</a>
+                {% endif %}
+            {% else %}
+                ...
+            {% endif %}
+        {% endfor %}        
+    {% endif %}
     <legend class="border-bottom mb-3">Recently Added Experiences</legend>
     {% for experience in experiences.items %}
         <article class="media content-section">

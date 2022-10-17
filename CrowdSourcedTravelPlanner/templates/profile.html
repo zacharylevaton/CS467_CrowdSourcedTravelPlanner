@@ -7,6 +7,10 @@
             <div class="media-body">
                 <h2 class="account-heading">{{ current_user.username }}</h2>
                 <p class="text-secondary">{{ current_user.email }}</p>
+                <!-- Display user location if input from "My Account" page -->
+                {% if current_user.location != "" %}
+                    <p class="text-secondary">{{ current_user.location }}</p>
+                {% endif %}
                 <p class="text-secondary">Member since {{ current_user.date_account_created.strftime('%Y') }}</p>
                 <p class="text-secondary">Experiences Created: {{ exp_count }}</p>
             </div>
