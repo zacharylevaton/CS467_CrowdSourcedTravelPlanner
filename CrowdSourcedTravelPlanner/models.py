@@ -27,6 +27,7 @@ class User(db.Model, UserMixin):
     location = db.Column(db.String(100), nullable=True, default="")
     latitude = db.Column(db.String(20), nullable=True)  # Temporarily nullable for now while I'm testing
     longitude = db.Column(db.String(20), nullable=True)  # Re-evaluate later
+    sort = db.Column(db.String(20), nullable=True, default='recent')
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}', '{self.image_file}')"

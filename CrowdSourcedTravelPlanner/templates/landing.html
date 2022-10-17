@@ -39,7 +39,11 @@
             {% endif %}
         {% endfor %}        
     {% endif %}
-    <legend class="border-bottom mb-3">Recently Added Experiences</legend>
+    {% if current_user.is_authenticated and current_user.sort == 'top_rated' %}
+        <legend class="border-bottom mb-3">Top Rated Experiences</legend>
+    {% else %}
+        <legend class="border-bottom mb-3">Recently Added Experiences</legend>
+    {% endif %}    
     {% for experience in experiences.items %}
         <article class="media content-section">
             <img class="rounded-circle article-img"
