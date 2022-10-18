@@ -1,19 +1,8 @@
 {% extends "pageLayout.html" %}
 
 {% block content %}
-    <div class="content-section">
-        <div class="media">
-            <img class="rounded-circle account-img" src="{{ image_file }}">
-            <div class="media-body">
-                <h2 class="account-heading">{{ current_user.username }}</h2>
-                <p class="text-secondary">{{ current_user.email }}</p>
-                <p class="text-secondary">Member since {{ current_user.date_account_created.strftime('%Y') }}</p>
-                <p class="text-secondary">Experiences Created: {{ exp_count }}</p>
-            </div>
-        </div>
-    </div>
-    <legend class="border-bottom mb-3">My Experiences</legend>
-    {% for experience in experiences %}
+    <legend class="border-bottom mb-4">Search Results for "{{ keyword_text }}" by Keyword ({{ experiences.total }})</legend>
+    {% for experience in experiences.items %}
         <article class="media content-section">
             <img class="rounded-circle article-img"
                  src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
@@ -25,7 +14,7 @@
                 <h2><a class="article-title"
                        href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a></h2>
                 <img class="img-rounded"
-                     src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
+                 src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
                 <p class="article-content pt-3">{{ experience.description }}</p>
                 <p class="article-content">Location: {{ experience.location }}</p>
                 <!-- Display geolocation if values exist for latitude and longitude -->
@@ -57,5 +46,17 @@
                 {% endif %}
             </div>
         </article>
+    {% endfor %}
+    <!-- Pagination setup -->
+    {% for page_num in experiences.iter_pages() %}
+        {% if page_num %}
+            {% if experiences.page == page_num %}
+                <a class="btn btn-secondary mb-4" href="{{ url_for('keyword', keyword_text=keyword_text, page=page_num) }}">{{ page_num }}</a>
+            {% else %}
+                <a class="btn btn-outline-secondary mb-4" href="{{ url_for('keyword', keyword_text=keyword_text, page=page_num) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            ...
+        {% endif %}
     {% endfor %}
 {% endblock content %}}

@@ -1,9 +1,11 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from CrowdSourcedTravelPlanner.models import User
 from flask_login import current_user
 from flask_wtf.file import FileField, FileAllowed
+from wtforms.fields import Field
+from wtforms.widgets import TextInput
 
 
 class RegistrationForm(FlaskForm):
@@ -72,12 +74,37 @@ class UpdateAccountForm(FlaskForm):
                 raise ValidationError('That email address is taken. Please enter a different one.')
 
 
+class KeywordListField(Field):
+    """
+    Custom field used to display a text box in which the user can enter multiple comma-delineated keywords.
+    The form then parses the user-entered string and returns a list of keyword strings.  Adapted from
+    https://wtforms.readthedocs.io/en/2.3.x/fields/.
+    """
+    widget = TextInput()
+
+    def _value(self):
+        if self.data:
+            return u', '.join(self.data)
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            self.data = [x.strip() for x in valuelist[0].split(',')]
+        else:
+            self.data = []
+
+
 class ExperienceForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     location = StringField('Location', validators=[DataRequired()])
-    rating = StringField('Rating', validators=[DataRequired()])
+    rating = DecimalField('Rating', validators=[DataRequired()])
     picture = FileField('Upload Experience Picture', validators=[FileAllowed(['jpg', 'png'])])
+
+    # At least 1 keyword is required for now during testing.  In the future we can decide if keywords will actually be
+    # required.
+    keywords = KeywordListField('Keywords (Please separate multiple keywords with commas)', validators=[DataRequired()])
     submit = SubmitField('Post')
 
 

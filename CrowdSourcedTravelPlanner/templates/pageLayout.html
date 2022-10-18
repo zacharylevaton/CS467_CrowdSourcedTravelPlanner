@@ -36,8 +36,11 @@
         <title>User Experiences</title>
         <link href="{{ url_for('static', filename='user_experiences.css') }}" rel="stylesheet" type="text/css">
     {% elif request.endpoint == 'search' %}
-        <title>User Experiences</title>
+        <title>Search</title>
         <link href="{{ url_for('static', filename='search.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'keyword' %}
+        <title>Keyword</title>
+        <link href="{{ url_for('static', filename='keyword.css') }}" rel="stylesheet" type="text/css">
     {% endif %}
 
 </head>

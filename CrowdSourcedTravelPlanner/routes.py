@@ -1,6 +1,6 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
 from flask import render_template, url_for, flash, redirect, request, abort
-from CrowdSourcedTravelPlanner.models import User, Experience
+from CrowdSourcedTravelPlanner.models import User, Experience, Keyword
 from flask_login import login_user, current_user, logout_user, login_required
 import os
 import secrets
@@ -203,8 +203,17 @@ def add_experience():
         geolocation = get_geolocation(experience.location)
         # Update the Experience with the latitude and longitude if values are found
         if geolocation:
-            experience.latitude = geolocation[0]
-            experience.longitude = geolocation[1]
+            experience.latitude = round(float(geolocation[0]), 4)  # Rounding Lat/Long to 4 decimal places for now
+            experience.longitude = round(float(geolocation[1]), 4)  # We can change it later if we need to
+
+        # The form returns a list of keywords.  Use the list to create new Keyword objects and set the Experience's
+        # keywords field.
+        received_keywords = form.keywords.data
+        keyword_list = []
+
+        for current_keyword in received_keywords:
+            keyword_list.append(Keyword(keyword_text=current_keyword))
+        experience.keywords = keyword_list
 
         # Add the new Experience to the database
         db.session.add(experience)
@@ -254,9 +263,19 @@ def update_experience(experience_id):
         geolocation = get_geolocation(experience.location)
         # Update the Experience with the latitude and longitude if values are found
         if geolocation:
-            experience.latitude = geolocation[0]
-            experience.longitude = geolocation[1]
+            experience.latitude = round(float(geolocation[0]), 4)  # Rounding Lat/Long to 4 decimal places for now
+            experience.longitude = round(float(geolocation[1]), 4)  # We can change it later if we need to
 
+        # The form returns a list of keywords.  Use the list to create new Keyword objects and set the Experience's
+        # keywords field.
+        received_keywords = form.keywords.data
+        keyword_list = []
+
+        for current_keyword in received_keywords:
+            keyword_list.append(Keyword(keyword_text=current_keyword))
+        experience.keywords = keyword_list
+
+        # Save changes to the database
         db.session.commit()
         flash('Your Experience has been updated!', 'success')
         return redirect(url_for('experience', experience_id=experience.id))
@@ -266,6 +285,12 @@ def update_experience(experience_id):
         form.description.data = experience.description
         form.location.data = experience.location
         form.rating.data = experience.rating
+
+        # Pre-fill the "Keywords" field by concatenating any existing keywords into a single string
+        display_list = []
+        for current_keyword in experience.keywords:
+            display_list.append(current_keyword.keyword_text)
+        form.keywords.data = display_list
 
     return render_template('create_experience.html', title='Update Experience', form=form, legend='Update Experience',
                            display_image=display_image)
@@ -325,8 +350,9 @@ def search():
             experiences = Experience.query.filter(Experience.location.like('%' + search_string + '%')) \
                 .order_by(Experience.title) \
                 .paginate(page=page, per_page=5)
-        if search_type == 'keyword':    # Returning results by location for now until keywords are implemented
-            experiences = Experience.query.filter(Experience.location.like('%' + search_string + '%')) \
+        elif search_type == 'keyword':
+            experiences = Experience.query\
+                .filter(Experience.keywords.any(Keyword.keyword_text.like('%' + search_string + '%'))) \
                 .order_by(Experience.title) \
                 .paginate(page=page, per_page=5)
 
@@ -335,3 +361,17 @@ def search():
 
     # Render original Search form
     return render_template('search.html', form=form)
+
+
+# Keyword Link page
+@app.route("/keyword/<string:keyword_text>")
+def keyword(keyword_text):
+    # Set page number for pagination
+    page = request.args.get('page', 1, type=int)
+
+    # Query for all the Experiences tagged with the received keyword
+    experiences = Experience.query \
+        .filter(Experience.keywords.any(Keyword.keyword_text.like('%' + keyword_text + '%'))) \
+        .order_by(Experience.title) \
+        .paginate(page=page, per_page=5)
+    return render_template('keyword.html', experiences=experiences, keyword_text=keyword_text)

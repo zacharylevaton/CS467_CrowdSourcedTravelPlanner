@@ -26,6 +26,28 @@
                 <p class="article-content">Geo-location (Lat, Long): {{ experience.latitude }}, {{ experience.longitude }}</p>
             {% endif %}
             <p class="article-content">Rating: {{ experience.rating }}</p>
+            <!-- Display list of keywords -->
+            {% if experience.keywords|length == 1 %}
+                <ul>
+                    <li style="display:inline-block;">Keywords: </li>
+                    <li style="display:inline-block;">
+                        <a class="mr-2" href="{{ url_for('keyword', keyword_text=experience.keywords[0].keyword_text) }}">{{ experience.keywords[0].keyword_text }}</a>
+                    </li>
+                </ul>
+            {% elif experience.keywords|length > 1 %}
+                <!-- Print the keywords in chunks so that the final keyword does not have a trailing ", " -->
+                <ul>
+                    <li style="display:inline-block;">Keywords: </li>
+                    {% for keyword in experience.keywords[:-1] %}
+                        <li style="display:inline-block;">
+                            <a class="mr-2" href="{{ url_for('keyword', keyword_text=keyword.keyword_text) }}">{{ keyword.keyword_text }}, </a>
+                        </li>
+                    {% endfor %}
+                    <li style="display:inline-block;">
+                        <a class="mr-2" href="{{ url_for('keyword', keyword_text=experience.keywords[-1].keyword_text) }}">{{ experience.keywords[-1].keyword_text }}</a>
+                    </li>
+                </ul>
+            {% endif %}
         </div>
     </article>
     <!-- Modal -->
