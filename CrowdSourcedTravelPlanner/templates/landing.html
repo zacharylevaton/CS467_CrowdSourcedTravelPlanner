@@ -1,7 +1,74 @@
 {% extends "pageLayout.html" %}
 
 {% block content %}
-    <legend class="border-bottom mb-3">Recently Added Experiences</legend>
+    {% if current_user.is_authenticated and current_user.location != "" %}
+        <legend class="border-bottom mb-3">Experiences Near Me</legend>
+        {% for nearby_experience in nearby_experiences.items %}
+            <article class="media content-section">
+                <img class="rounded-circle article-img"
+                    src="{{ url_for('static', filename='profile_pics/' + nearby_experience.author.image_file) }}">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="{{ url_for('user_experiences', username=nearby_experience.author.username) }}">{{ nearby_experience.author.username }}</a>
+                        <small class="text-muted">{{ nearby_experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
+                    </div>
+                    <h2><a class="article-title"
+                        href="{{ url_for('experience', experience_id=nearby_experience.id) }}">{{ nearby_experience.title }}</a></h2>
+                    <img class="img-rounded"
+                    src="{{ url_for('static', filename='experience_pics/' + nearby_experience.image_file) }}">
+                    <p class="article-content pt-3">{{ nearby_experience.description }}</p>
+                    <p class="article-content">Location: {{ nearby_experience.location }}</p>
+                    <!-- Display geolocation if values exist for latitude and longitude -->
+                    {% if nearby_experience.latitude != -200 and nearby_experience.longitude != -200 %}
+                        <p class="article-content">Geo-location (Lat, Long): {{ nearby_experience.latitude }}, {{ nearby_experience.longitude }}</p>
+                    {% else %}
+                        <p class="article-content">Geo-location (Lat, Long): Latitude and Longitude not found for this location.</p>
+                    {% endif %}
+                    <p class="article-content">Rating: {{ nearby_experience.rating }}</p>
+                    <!-- Display list of keywords -->
+                    {% if nearby_experience.keywords|length == 1 %}
+                        <ul>
+                            <li style="display:inline-block;">Keywords: </li>
+                            <li style="display:inline-block;">
+                                <a class="mr-2" href="{{ url_for('keyword', keyword_text=nearby_experience.keywords[0].keyword_text) }}">{{ nearby_experience.keywords[0].keyword_text }}</a>
+                            </li>
+                        </ul>
+                    {% elif nearby_experience.keywords|length > 1 %}
+                        <!-- Print the keywords in chunks so that the final keyword does not have a trailing ", " -->
+                        <ul>
+                            <li style="display:inline-block;">Keywords: </li>
+                            {% for keyword in nearby_experience.keywords[:-1] %}
+                                <li style="display:inline-block;">
+                                    <a class="mr-2" href="{{ url_for('keyword', keyword_text=keyword.keyword_text) }}">{{ keyword.keyword_text }}, </a>
+                                </li>
+                            {% endfor %}
+                            <li style="display:inline-block;">
+                                <a class="mr-2" href="{{ url_for('keyword', keyword_text=nearby_experience.keywords[-1].keyword_text) }}">{{ nearby_experience.keywords[-1].keyword_text }}</a>
+                            </li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </article>
+        {% endfor %}
+        <!-- Pagination setup -->
+        {% for nearby_page_num in nearby_experiences.iter_pages() %}
+            {% if nearby_page_num %}
+                {% if nearby_experiences.page == nearby_page_num %}
+                    <a class="btn btn-secondary mb-4" href="{{ url_for('landing', nearby_page=nearby_page_num) }}">{{ nearby_page_num }}</a>
+                {% else %}
+                    <a class="btn btn-outline-secondary mb-4" href="{{ url_for('landing', nearby_page=nearby_page_num) }}">{{ nearby_page_num }}</a>
+                {% endif %}
+            {% else %}
+                ...
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    <!-- Display page title depending on sorting options -->
+    {% if current_user.is_authenticated and current_user.sort == 'top_rated' %}
+        <legend class="border-bottom mb-3">Top Rated Experiences</legend>
+    {% else %}
+        <legend class="border-bottom mb-3">Recently Added Experiences</legend>
+    {% endif %}
     {% for experience in experiences.items %}
         <article class="media content-section">
             <img class="rounded-circle article-img"
@@ -18,8 +85,10 @@
                 <p class="article-content pt-3">{{ experience.description }}</p>
                 <p class="article-content">Location: {{ experience.location }}</p>
                 <!-- Display geolocation if values exist for latitude and longitude -->
-                {% if experience.latitude and experience.longitude %}
+                {% if experience.latitude != -200 and experience.longitude != -200 %}
                     <p class="article-content">Geo-location (Lat, Long): {{ experience.latitude }}, {{ experience.longitude }}</p>
+                {% else %}
+                    <p class="article-content">Geo-location (Lat, Long): Latitude and Longitude not found for this location.</p>
                 {% endif %}
                 <p class="article-content">Rating: {{ experience.rating }}</p>
                 <!-- Display list of keywords -->

@@ -7,6 +7,10 @@
             <div class="media-body">
                 <h2 class="account-heading">{{ current_user.username }}</h2>
                 <p class="text-secondary">{{ current_user.email }}</p>
+                <!-- Display user location if input from "My Account" page -->
+                {% if current_user.location != "" %}
+                    <p class="text-secondary">{{ current_user.location }}</p>
+                {% endif %}
                 <p class="text-secondary">Member since {{ current_user.date_account_created.strftime('%Y') }}</p>
                 <p class="text-secondary">Experiences Created: {{ exp_count }}</p>
             </div>
@@ -29,8 +33,10 @@
                 <p class="article-content pt-3">{{ experience.description }}</p>
                 <p class="article-content">Location: {{ experience.location }}</p>
                 <!-- Display geolocation if values exist for latitude and longitude -->
-                {% if experience.latitude and experience.longitude %}
+                {% if experience.latitude != -200 and experience.longitude != -200 %}
                     <p class="article-content">Geo-location (Lat, Long): {{ experience.latitude }}, {{ experience.longitude }}</p>
+                {% else %}
+                    <p class="article-content">Geo-location (Lat, Long): Latitude and Longitude not found for this location.</p>
                 {% endif %}
                 <p class="article-content">Rating: {{ experience.rating }}</p>
                 <!-- Display list of keywords -->

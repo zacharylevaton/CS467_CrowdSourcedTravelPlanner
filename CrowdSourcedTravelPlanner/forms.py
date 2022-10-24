@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField, \
+    RadioField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from CrowdSourcedTravelPlanner.models import User
 from flask_login import current_user
@@ -52,10 +53,14 @@ class LoginForm(FlaskForm):
 class UpdateAccountForm(FlaskForm):
     """
     Defines the form elements to update user attributes on the "My Account" page, including changing one's username,
-    email address, and uploading a new/different profile picture.
+    email address, location, and uploading a new/different profile picture.
     """
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
+    location = StringField('Location')
+    sort = RadioField('Sort',
+                      choices=[('recent', 'Recently Added Experiences'), ('top_rated', 'Top Rated Experiences')],
+                      validators=[DataRequired()])
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
 

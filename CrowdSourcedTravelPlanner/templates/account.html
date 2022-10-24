@@ -40,6 +40,30 @@
                         {{ form.email(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+                <!-- Set user location (optional) -->
+                <div class="form-group pt-3">
+                    {{ form.location.label(class="form-control-label") }}
+                    {% if form.location.errors %}
+                        {{ form.location(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.location.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.location(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <!-- Landing Page sorting options -->
+                <div class="form-group pt-3">
+                    {{ form.sort.label(class="form-control-label") }}
+                    {% for subfield in form.sort %}
+                        <tr>
+                            <td>{{ subfield }}</td>
+                            <td>{{ subfield.label }}</td>
+                        </tr>
+                    {% endfor %}
+                </div>
                 <!-- Update profile picture/change from default -->
                 <div class="form-group pt-3">
                     {{ form.picture.label() }}

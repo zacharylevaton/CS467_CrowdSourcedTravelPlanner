@@ -22,8 +22,10 @@
             <p class="article-content pt-3">{{ experience.description }}</p>
             <p class="article-content">Location: {{ experience.location }}</p>
             <!-- Display geolocation if values exist for latitude and longitude -->
-            {% if experience.latitude and experience.longitude %}
+            {% if experience.latitude != -200 and experience.longitude != -200 %}
                 <p class="article-content">Geo-location (Lat, Long): {{ experience.latitude }}, {{ experience.longitude }}</p>
+            {% else %}
+                <p class="article-content">Geo-location (Lat, Long): Latitude and Longitude not found for this location.</p>
             {% endif %}
             <p class="article-content">Rating: {{ experience.rating }}</p>
             <!-- Display list of keywords -->

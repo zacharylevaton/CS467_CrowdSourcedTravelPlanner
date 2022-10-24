@@ -2,6 +2,7 @@ from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
 from flask import render_template, url_for, flash, redirect, request, abort
 from CrowdSourcedTravelPlanner.models import User, Experience, Keyword
 from flask_login import login_user, current_user, logout_user, login_required
+from sqlalchemy import and_
 import os
 import secrets
 from PIL import Image
@@ -15,9 +16,30 @@ import urllib.parse
 def landing():
     # Set page number for pagination
     page = request.args.get('page', 1, type=int)
+    nearby_page = request.args.get('nearby_page', 1, type=int)
 
-    # Get all experiences and sort by date created in descending order
-    experiences = Experience.query.order_by(Experience.date_posted.desc()).paginate(page=page, per_page=5)
+    # If no user is currently logged in, get all experiences and sort by date created in descending order
+    if not current_user.is_authenticated:
+        experiences = Experience.query.order_by(Experience.date_posted.desc()).paginate(page=page, per_page=5)
+        return render_template('landing.html', experiences=experiences)
+
+    # Check if user has set sort to "most recent"
+    if current_user.sort == 'recent':
+        experiences = Experience.query.order_by(Experience.date_posted.desc()).paginate(page=page, per_page=3)
+
+    # Check if user has set sort to "top-rated"
+    if current_user.sort == 'top_rated':
+        experiences = Experience.query.order_by(Experience.rating.desc()).paginate(page=page, per_page=3)
+
+    # Check if user is logged in and set their location
+    if current_user.is_authenticated and current_user.location != "":
+
+        # Get all nearby experiences (under ~35 miles)
+        nearby_experiences = Experience.query.filter(
+            and_(Experience.longitude - User.longitude < 0.5, Experience.latitude - User.latitude < 0.5)).paginate(
+            page=nearby_page, per_page=10)
+        return render_template('landing.html', experiences=experiences, nearby_experiences=nearby_experiences)
+
     return render_template('landing.html', experiences=experiences)
 
 
@@ -139,12 +161,25 @@ def account():
 
         current_user.username = form.username.data
         current_user.email = form.email.data
+        current_user.location = form.location.data
+        current_user.sort = form.sort.data
+
+        # Get the latitude and longitude of the address entered on the form
+        if current_user.location != "":
+            geolocation = get_geolocation(current_user.location)
+
+            # Update the User attributes with the latitude and longitude if values are found
+            if geolocation:
+                current_user.latitude = round(float(geolocation[0]), 4)
+                current_user.longitude = round(float(geolocation[1]), 4)
+
         db.session.commit()
         flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))
     elif request.method == 'GET':
         form.username.data = current_user.username
         form.email.data = current_user.email
+        form.location.data = current_user.location
 
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='My Account', image_file=image_file, form=form)
@@ -178,7 +213,10 @@ def get_geolocation(address):
 
     response = requests.get(url).json()
 
-    return response[0]["lat"], response[0]["lon"]
+    if response:
+        return response[0]["lat"], response[0]["lon"]
+    else:
+        return '-200', '-200'   # '-200' is outside the valid range and is used as a flag if no valid results are found
 
 
 # Add Experience page
