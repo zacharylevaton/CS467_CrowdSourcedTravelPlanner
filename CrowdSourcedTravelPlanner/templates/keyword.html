@@ -4,16 +4,23 @@
     <legend class="border-bottom mb-4">Search Results for "{{ keyword_text }}" by Keyword ({{ experiences.total }})</legend>
     {% for experience in experiences.items %}
         <article class="media content-section">
-            <!-- Display user account image with link to User Experiences page -->
-            <a href="{{ url_for('user_experiences', username=experience.author.username) }}">
-                <img class="rounded-circle article-img"
-                     src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
-            </a>
             <div class="media-body">
-                <div class="article-metadata">
-                    <a class="mr-2 text-decoration-none" href="{{ url_for('user_experiences', username=experience.author.username) }}">{{ experience.author.username }}</a>
-                    <small class="text-muted">{{ experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
-                </div>
+                <!-- User header information -->
+                <ul>
+                    <li style="display:inline-block;">
+                        <!-- Display user account image with link to User Experiences page -->
+                        <a href="{{ url_for('user_experiences', username=experience.author.username) }}">
+                            <img class="rounded-circle article-img"
+                                 src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
+                        </a>
+                    </li>
+                    <li style="display:inline-block;">
+                        <a class="mr-2 text-decoration-none" href="{{ url_for('user_experiences', username=experience.author.username) }}">{{ experience.author.username }}</a>
+                    </li>
+                    <li style="display:inline-block; padding-left: 20px;">
+                        <small class="text-muted ">{{ experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
+                    </li>
+                </ul>
                 <h2><a class="article-title text-decoration-none"
                        href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a></h2>
                 <!-- Display Experience image with link to Experience page -->
@@ -21,37 +28,49 @@
                     <img class="img-rounded"
                          src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
                 </a>
-                <p class="article-content pt-3">{{ experience.description }}</p>
-                <p class="article-content">Location: {{ experience.location }}</p>
-                <!-- Display geolocation if values exist for latitude and longitude -->
-                {% if experience.latitude != -200 and experience.longitude != -200 %}
-                    <p class="article-content">Geo-location (Lat, Long): {{ experience.latitude }}, {{ experience.longitude }}</p>
-                {% else %}
-                    <p class="article-content">Geo-location (Lat, Long): Latitude and Longitude not found for this location.</p>
-                {% endif %}
-                <p class="article-content">Rating: {{ experience.rating }}</p>
-                <!-- Display list of keywords -->
-                {% if experience.keywords|length == 1 %}
-                    <ul>
-                        <li style="display:inline-block;">Keywords: </li>
-                        <li style="display:inline-block;">
-                            <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=experience.keywords[0].keyword_text) }}">{{ experience.keywords[0].keyword_text }}</a>
-                        </li>
-                    </ul>
-                {% elif experience.keywords|length > 1 %}
-                    <!-- Print the keywords in chunks so that the final keyword does not have a trailing ", " -->
-                    <ul>
-                        <li style="display:inline-block;">Keywords: </li>
-                        {% for keyword in experience.keywords[:-1] %}
-                            <li style="display:inline-block;">
-                                <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=keyword.keyword_text) }}">{{ keyword.keyword_text }}, </a>
-                            </li>
-                        {% endfor %}
-                        <li style="display:inline-block;">
-                            <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=experience.keywords[-1].keyword_text) }}">{{ experience.keywords[-1].keyword_text }}</a>
-                        </li>
-                    </ul>
-                {% endif %}
+                <!-- Bootstrap Detail List -->
+                <div class="container" style="margin-top: 20px;">
+                    <dl class="row">
+                        <dt class="col-sm-3">Description</dt>
+                        <dd class="col-sm-9">{{ experience.description }}</dd>
+                        <dt class="col-sm-3">Location</dt>
+                        <dd class="col-sm-9">{{ experience.location }}</dd>
+                        <dt class="col-sm-3">Latitude, Longitude</dt>
+                        <dd class="col-sm-9">
+                            <!-- Display geolocation if values exist for latitude and longitude -->
+                            {% if experience.latitude != -200 and experience.longitude != -200 %}
+                                {{ experience.latitude }}°, {{ experience.longitude }}°
+                            {% else %}
+                                Latitude and Longitude not found for this location.
+                            {% endif %}
+                        </dd>
+                        <dt class="col-sm-3">Rating</dt>
+                        <dd class="col-sm-9">{{ experience.rating }}</dd>
+                        <dt class="col-sm-3">Keywords</dt>
+                        <dd class="col-sm-9">
+                            <!-- Display list of keywords -->
+                            {% if experience.keywords|length == 1 %}
+                                <ul>
+                                    <li style="display:inline-block;">
+                                        <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=experience.keywords[0].keyword_text) }}">{{ experience.keywords[0].keyword_text }}</a>
+                                    </li>
+                                </ul>
+                            {% elif experience.keywords|length > 1 %}
+                                <!-- Print the keywords in chunks so that the final keyword does not have a trailing ", " -->
+                                <ul>
+                                    {% for keyword in experience.keywords[:-1] %}
+                                        <li style="display:inline-block;">
+                                            <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=keyword.keyword_text) }}">{{ keyword.keyword_text }}, </a>
+                                        </li>
+                                    {% endfor %}
+                                    <li style="display:inline-block;">
+                                        <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=experience.keywords[-1].keyword_text) }}">{{ experience.keywords[-1].keyword_text }}</a>
+                                    </li>
+                                </ul>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </div>
             </div>
         </article>
     {% endfor %}
