@@ -19,17 +19,23 @@
     <legend class="border-bottom mb-3">My Experiences</legend>
     {% for experience in experiences %}
         <article class="media content-section">
-            <img class="rounded-circle article-img"
-                 src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
+            <!-- Display user account image with link to User Experiences page -->
+            <a href="{{ url_for('user_experiences', username=experience.author.username) }}">
+                <img class="rounded-circle article-img"
+                     src="{{ url_for('static', filename='profile_pics/' + experience.author.image_file) }}">
+            </a>
             <div class="media-body">
                 <div class="article-metadata">
-                    <a class="mr-2" href="{{ url_for('user_experiences', username=experience.author.username) }}">{{ experience.author.username }}</a>
+                    <a class="mr-2 text-decoration-none" href="{{ url_for('user_experiences', username=experience.author.username) }}">{{ experience.author.username }}</a>
                     <small class="text-muted">{{ experience.date_posted.strftime('%m/%d/%Y, %H:%M') }}</small>
                 </div>
-                <h2><a class="article-title"
+                <h2><a class="article-title text-decoration-none"
                        href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a></h2>
-                <img class="img-rounded"
-                     src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
+                <!-- Display Experience image with link to Experience page -->
+                <a href="{{ url_for('experience', experience_id=experience.id) }}">
+                    <img class="img-rounded"
+                         src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
+                </a>
                 <p class="article-content pt-3">{{ experience.description }}</p>
                 <p class="article-content">Location: {{ experience.location }}</p>
                 <!-- Display geolocation if values exist for latitude and longitude -->
@@ -44,7 +50,7 @@
                     <ul>
                         <li style="display:inline-block;">Keywords: </li>
                         <li style="display:inline-block;">
-                            <a class="mr-2" href="{{ url_for('keyword', keyword_text=experience.keywords[0].keyword_text) }}">{{ experience.keywords[0].keyword_text }}</a>
+                            <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=experience.keywords[0].keyword_text) }}">{{ experience.keywords[0].keyword_text }}</a>
                         </li>
                     </ul>
                 {% elif experience.keywords|length > 1 %}
@@ -53,11 +59,11 @@
                         <li style="display:inline-block;">Keywords: </li>
                         {% for keyword in experience.keywords[:-1] %}
                             <li style="display:inline-block;">
-                                <a class="mr-2" href="{{ url_for('keyword', keyword_text=keyword.keyword_text) }}">{{ keyword.keyword_text }}, </a>
+                                <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=keyword.keyword_text) }}">{{ keyword.keyword_text }}, </a>
                             </li>
                         {% endfor %}
                         <li style="display:inline-block;">
-                            <a class="mr-2" href="{{ url_for('keyword', keyword_text=experience.keywords[-1].keyword_text) }}">{{ experience.keywords[-1].keyword_text }}</a>
+                            <a class="mr-2 text-decoration-none" href="{{ url_for('keyword', keyword_text=experience.keywords[-1].keyword_text) }}">{{ experience.keywords[-1].keyword_text }}</a>
                         </li>
                     </ul>
                 {% endif %}
