@@ -34,7 +34,7 @@ def landing():
     if current_user.is_authenticated and current_user.location != "":
 
             # Get all nearby experiences (under ~35 miles)
-            nearby_experiences = Experience.query.filter(and_(Experience.longitude-User.longitude < 0.5, Experience.latitude-User.latitude < 0.5)).paginate(page=nearby_page, per_page=10)
+            nearby_experiences = Experience.query.filter(and_(Experience.longitude-User.longitude < 0.5, Experience.latitude-User.latitude < 0.5, User.longitude-Experience.longitude < 0.5, User.latitude-Experience.latitude < 0.5)).paginate(page=nearby_page, per_page=10)
             return render_template('landing.html', experiences=experiences, nearby_experiences=nearby_experiences)
 
     return render_template('landing.html', experiences=experiences)
