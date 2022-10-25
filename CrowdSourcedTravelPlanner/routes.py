@@ -33,10 +33,10 @@ def landing():
 
     # Check if user is logged in and set their location
     if current_user.is_authenticated and current_user.location != "":
-
         # Get all nearby experiences (under ~35 miles)
         nearby_experiences = Experience.query.filter(
-            and_(Experience.longitude - User.longitude < 0.5, Experience.latitude - User.latitude < 0.5)).paginate(
+            and_(Experience.longitude - User.longitude < 0.5, Experience.latitude - User.latitude < 0.5,
+                 User.longitude - Experience.longitude < 0.5, User.latitude - Experience.latitude < 0.5)).paginate(
             page=nearby_page, per_page=10)
         return render_template('landing.html', experiences=experiences, nearby_experiences=nearby_experiences)
 
@@ -180,6 +180,7 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
         form.location.data = current_user.location
+        form.sort.data = current_user.sort
 
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('account.html', title='My Account', image_file=image_file, form=form)
@@ -216,7 +217,7 @@ def get_geolocation(address):
     if response:
         return response[0]["lat"], response[0]["lon"]
     else:
-        return '-200', '-200'   # '-200' is outside the valid range and is used as a flag if no valid results are found
+        return '-200', '-200'  # '-200' is outside the valid range and is used as a flag if no valid results are found
 
 
 # Add Experience page
@@ -389,7 +390,7 @@ def search():
                 .order_by(Experience.title) \
                 .paginate(page=page, per_page=5)
         elif search_type == 'keyword':
-            experiences = Experience.query\
+            experiences = Experience.query \
                 .filter(Experience.keywords.any(Keyword.keyword_text.like('%' + search_string + '%'))) \
                 .order_by(Experience.title) \
                 .paginate(page=page, per_page=5)
