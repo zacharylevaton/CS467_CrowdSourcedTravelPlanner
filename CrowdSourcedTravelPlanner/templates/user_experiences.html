@@ -1,23 +1,8 @@
 {% extends "pageLayout.html" %}
 
 {% block content %}
-    <div class="content-section">
-        <div class="media">
-            <img class="rounded-circle account-img" src="{{ image_file }}">
-            <div class="media-body">
-                <h2 class="account-heading">{{ current_user.username }}</h2>
-                <p class="text-secondary">{{ current_user.email }}</p>
-                <!-- Display user location if input from "My Account" page -->
-                {% if current_user.location != "" %}
-                    <p class="text-secondary">{{ current_user.location }}</p>
-                {% endif %}
-                <p class="text-secondary">Member since {{ current_user.date_account_created.strftime('%Y') }}</p>
-                <p class="text-secondary">Experiences Created: {{ exp_count }}</p>
-            </div>
-        </div>
-    </div>
-    <legend class="border-bottom mb-3">My Experiences</legend>
-    {% for experience in experiences %}
+    <legend class="border-bottom mb-4">Experiences by {{ user.username }} ({{ experiences.total }})</legend>
+    {% for experience in experiences.items %}
         <article class="media content-section">
             <div class="media-body">
                 <!-- User header information -->
@@ -88,5 +73,17 @@
                 </div>
             </div>
         </article>
+    {% endfor %}
+    <!-- Pagination setup -->
+    {% for page_num in experiences.iter_pages() %}
+        {% if page_num %}
+            {% if experiences.page == page_num %}
+                <a class="btn btn-secondary mb-4" href="{{ url_for('user_experiences', username=user.username, page=page_num) }}">{{ page_num }}</a>
+            {% else %}
+                <a class="btn btn-outline-secondary mb-4" href="{{ url_for('user_experiences', username=user.username, page=page_num) }}">{{ page_num }}</a>
+            {% endif %}
+        {% else %}
+            ...
+        {% endif %}
     {% endfor %}
 {% endblock content %}}

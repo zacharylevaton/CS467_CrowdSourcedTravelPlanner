@@ -1,0 +1,40 @@
+{% extends "pageLayout.html" %}
+
+{% block content %}
+    <div class="content-section">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Search Experiences</legend>
+                <div class="form-group mb-3">
+                    {{ form.search_type.label(class="sr-only") }}
+                    {% if form.search_type.errors %}
+                        {{ form.search_type(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.search_type.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.search_type(class="form-control") }}
+                    {% endif %}
+                </div>
+                <div class="form-group mb-1">
+                    {% if form.search_string.errors %}
+                        {{ form.search_string(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.search_string.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.search_string(class="form-control form-control-lg", placeholder="Search...") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group pt-3">
+                {{ form.submit(class="btn btn-outline-secondary mb-2") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}}

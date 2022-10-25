@@ -18,18 +18,36 @@
         <title>Register</title>
         <link href="{{ url_for('static', filename='register.css') }}" rel="stylesheet" type="text/css">
     {% elif request.endpoint == 'profile' %}
-        <title>Register</title>
+        <title>My Profile</title>
         <link href="{{ url_for('static', filename='profile.css') }}" rel="stylesheet" type="text/css">
     {% elif request.endpoint == 'account' %}
-        <title>Register</title>
+        <title>My Account</title>
         <link href="{{ url_for('static', filename='account.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'add_experience' %}
+        <title>Add Experience</title>
+        <link href="{{ url_for('static', filename='create_experience.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'experience' %}
+        <title>Experience Details</title>
+        <link href="{{ url_for('static', filename='experience.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'update_experience' %}
+        <title>Update Experience</title>
+        <link href="{{ url_for('static', filename='update_experience.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'user_experiences' %}
+        <title>User Experiences</title>
+        <link href="{{ url_for('static', filename='user_experiences.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'search' %}
+        <title>Search</title>
+        <link href="{{ url_for('static', filename='search.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'keyword' %}
+        <title>Keyword</title>
+        <link href="{{ url_for('static', filename='keyword.css') }}" rel="stylesheet" type="text/css">
     {% endif %}
 
 </head>
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Crowd Sourced Travel Planner</a>
+        <a class="navbar-brand" href="{{ url_for('landing') }}">Crowd Sourced Travel Planner</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -39,7 +57,7 @@
                     <a class="nav-link" href="{{ url_for('landing') }}">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Search Experiences</a>
+                    <a class="nav-link" href="{{ url_for('search') }}">Search Experiences</a>
                 </li>
                 <!-- TODO: After implementing login persistence, complete following changes:
                     - Update navbar to include "Add Experience"
@@ -49,7 +67,7 @@
                 <!-- TODO: After implementing login persistence, have this change from Login to Profile -->
                 {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Add Experience</a>
+                        <a class="nav-link" href="{{ url_for('add_experience') }}">Add Experience</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('profile') }}">My Profile</a>

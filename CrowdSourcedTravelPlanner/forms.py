@@ -1,9 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField, DecimalField, \
+    RadioField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from CrowdSourcedTravelPlanner.models import User
 from flask_login import current_user
 from flask_wtf.file import FileField, FileAllowed
+from wtforms.fields import Field
+from wtforms.widgets import TextInput
 
 
 class RegistrationForm(FlaskForm):
@@ -50,10 +53,14 @@ class LoginForm(FlaskForm):
 class UpdateAccountForm(FlaskForm):
     """
     Defines the form elements to update user attributes on the "My Account" page, including changing one's username,
-    email address, and uploading a new/different profile picture.
+    email address, location, and uploading a new/different profile picture.
     """
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
+    location = StringField('Location')
+    sort = RadioField('Sort',
+                      choices=[('recent', 'Recently Added Experiences'), ('top_rated', 'Top Rated Experiences')],
+                      validators=[DataRequired()])
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
 
@@ -70,3 +77,43 @@ class UpdateAccountForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('That email address is taken. Please enter a different one.')
+
+
+class KeywordListField(Field):
+    """
+    Custom field used to display a text box in which the user can enter multiple comma-delineated keywords.
+    The form then parses the user-entered string and returns a list of keyword strings.  Adapted from
+    https://wtforms.readthedocs.io/en/2.3.x/fields/.
+    """
+    widget = TextInput()
+
+    def _value(self):
+        if self.data:
+            return u', '.join(self.data)
+        else:
+            return u''
+
+    def process_formdata(self, valuelist):
+        if valuelist:
+            self.data = [x.strip() for x in valuelist[0].split(',')]
+        else:
+            self.data = []
+
+
+class ExperienceForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
+    rating = DecimalField('Rating', validators=[DataRequired()])
+    picture = FileField('Upload Experience Picture', validators=[FileAllowed(['jpg', 'png'])])
+
+    # At least 1 keyword is required for now during testing.  In the future we can decide if keywords will actually be
+    # required.
+    keywords = KeywordListField('Keywords (Please separate multiple keywords with commas)', validators=[DataRequired()])
+    submit = SubmitField('Post')
+
+
+class SearchForm(FlaskForm):
+    search_type = SelectField('Search by', choices=[('location', 'Location'), ('keyword', 'Keyword')])
+    search_string = StringField('Search String', validators=[DataRequired()])
+    submit = SubmitField('Search')

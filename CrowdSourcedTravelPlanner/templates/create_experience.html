@@ -1,0 +1,96 @@
+{% extends "pageLayout.html" %}
+
+{% block content %}
+    <div class="content-section">
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">{{ legend }}</legend>
+                <div class="form-group">
+                    {{ form.title.label(class="form-control-label") }}
+                    {% if form.title.errors %}
+                        {{ form.title(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.title.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.title(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group pt-3">
+                    {{ form.description.label(class="form-control-label") }}
+                    {% if form.description.errors %}
+                        {{ form.description(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.description.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.description(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group pt-3">
+                    {{ form.location.label(class="form-control-label") }}
+                    {% if form.location.errors %}
+                        {{ form.location(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.location.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.location(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group pt-3 pb-4">
+                    {{ form.rating.label(class="form-control-label") }}
+                    {% if form.rating.errors %}
+                        {{ form.rating(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.rating.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.rating(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group mb-3">
+                    {{ form.keywords.label(class="form-control-label") }}
+                    {% if form.keywords.errors %}
+                        {{ form.keywords(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.keywords.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.keywords(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <!-- Show preview of the Experience's current image, or default image for the "Add Experience" page -->
+                {% if display_image == 'default.jpg' %}
+                    <p>Default Image</p>
+                {% endif %}
+                <img class="img-rounded"
+                 src="{{ url_for('static', filename='experience_pics/' + display_image) }}">
+                <!-- Upload a custom image for the Experience -->
+                <div class="form-group pt-3">
+                    {{ form.picture.label() }}
+                    {{ form.picture(class="form-control-file") }}
+                    {% if form.picture.errors %}}
+                        {% for error in form.picture.errors %}
+                            <span class="text-danger">{{ error }}</span></br>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group pt-3">
+                {{ form.submit(class="btn btn-outline-secondary") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}}
