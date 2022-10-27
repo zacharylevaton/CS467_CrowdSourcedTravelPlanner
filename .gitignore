@@ -2,6 +2,3 @@
 __pycache__/
 .idea/
 .gitignore
-
-# Ignoring local instance of database.
-site.db
