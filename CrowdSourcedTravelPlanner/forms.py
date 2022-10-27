@@ -117,3 +117,10 @@ class SearchForm(FlaskForm):
     search_type = SelectField('Search by', choices=[('location', 'Location'), ('keyword', 'Keyword')])
     search_string = StringField('Search String', validators=[DataRequired()])
     submit = SubmitField('Search')
+
+
+class CreateTripForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    location = StringField('Location', validators=[DataRequired()])
+    picture = FileField('Upload Trip Picture', validators=[FileAllowed(['jpg', 'png'])])
+    submit = SubmitField('Create Trip')
