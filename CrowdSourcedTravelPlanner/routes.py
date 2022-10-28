@@ -437,3 +437,39 @@ def create_trip():
 
     return render_template('create_trip.html', title='Create Trip', form=form, display_image=display_image,
                            legend='Create Trip')
+
+
+# Update trip page.
+# TODO: Update route name dynamically with trip #
+@app.route("/trip/update", methods=['GET', 'POST'])
+@login_required
+def update_trip():
+    form = forms.SearchForm()
+
+    # TODO: Pull trip info from db.
+    trip_title, trip_image = 'My Trip to California', 'trip_default.jpg'
+
+    # Default values for form submittal.
+    experiences = search_type = search_string = None
+
+    if form.validate_on_submit():
+        search_type = form.search_type.data
+        search_string = form.search_string.data
+
+        # Set page number for pagination
+        page = request.args.get('page', 1, type=int)
+
+        # Get Experience results depending on whether search is by location or keyword
+        # TODO: Filter search results based on experiences already added to trip.
+        if search_type == 'location':
+            experiences = Experience.query.filter(Experience.location.like('%' + search_string + '%')) \
+                .order_by(Experience.title) \
+                .paginate(page=page, per_page=5)
+        elif search_type == 'keyword':
+            experiences = Experience.query \
+                .filter(Experience.keywords.any(Keyword.keyword_text.like('%' + search_string + '%'))) \
+                .order_by(Experience.title) \
+                .paginate(page=page, per_page=5)
+
+    return render_template('update_trip.html', form=form, experiences=experiences, search_type=search_type,
+                           search_string=search_string, trip_title=trip_title, trip_image=trip_image)
