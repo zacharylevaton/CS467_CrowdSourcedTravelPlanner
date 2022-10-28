@@ -44,6 +44,9 @@
     {% elif request.endpoint == 'create_trip' %}
         <title>Create Trip</title>
         <link href="{{ url_for('static', filename='create_trip.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'update_trip' %}
+        <title>Create Trip</title>
+        <link href="{{ url_for('static', filename='update_trip.css') }}" rel="stylesheet" type="text/css">
     {% endif %}
 
 </head>
@@ -137,6 +140,8 @@
     <script src="https://code.jquery.com/jquery-3.6.1.slim.min.js" integrity="sha256-w8CvhFs7iHNVUtnSP0YKEg00p9Ih13rlL9zGqvLdePA=" crossorigin="anonymous"></script>
     {% if request.endpoint in ['create_trip'] %}
         <script src="{{ url_for('static', filename='user-uploaded-image-update.js') }}"></script>
+    {% elif request.endpoint in ['update_trip'] %}
+        <script src="{{ url_for('static', filename='update_trip.js') }}"></script>
     {% endif %}
 
     <!-- JavaScript Bundle with Popper (Bootstrap) -->
