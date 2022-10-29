@@ -20,19 +20,6 @@
                     {% endif %}
                 </div>
                 <div class="form-group pt-3">
-                    {{ form.description.label(class="form-control-label") }}
-                    {% if form.description.errors %}
-                        {{ form.description(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.description.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.description(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group pt-3">
                     {{ form.location.label(class="form-control-label") }}
                     {% if form.location.errors %}
                         {{ form.location(class="form-control form-control-lg is-invalid") }}
@@ -45,28 +32,16 @@
                         {{ form.location(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <div class="form-group mb-3 pt-3">
-                    {{ form.keywords.label(class="form-control-label") }}
-                    {% if form.keywords.errors %}
-                        {{ form.keywords(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.keywords.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.keywords(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <!-- Show preview of the Experience's current image for the "Add Experience" page -->
+
+                <!-- Show preview of the Trip's current image, or default image -->
                 <div>
-                    <p>Current Image</p>
+                    <p>Trip Photo</p>
                 </div>
                 <div id="user-uploaded-image">
                     <img class="img-rounded"
-                        src="{{ url_for('static', filename='experience_pics/' + display_image) }}">
+                        src="{{ url_for('static', filename='trip_pics/' + display_image) }}">
                 </div>
-                <!-- Upload a custom image for the Experience -->
+                <!-- Upload a custom image for the Trip -->
                 <div class="form-group pt-3">
                     {{ form.picture.label() }}
                     {{ form.picture(class="form-control-file") }}
@@ -82,4 +57,4 @@
             </div>
         </form>
     </div>
-{% endblock content %}}
+{% endblock content %}

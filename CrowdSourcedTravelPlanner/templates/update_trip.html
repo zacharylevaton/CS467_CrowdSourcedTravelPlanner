@@ -1,0 +1,110 @@
+{% extends "pageLayout.html" %}
+
+{% block content %}
+    <div class="row">
+        <!-- Trip information -->
+        <div class="col-md-6 content-section">
+            <legend class="border-bottom mb-4">{{ trip_title }}</legend>
+            <img class="img-rounded"
+                    src="{{ url_for('static', filename='trip_pics/' + trip_image) }}">
+        </div>
+
+        <!-- Buffer -->
+        <div class="col-md-auto">
+        </div>
+
+        <!-- Experience search form -->
+        <div class="col content-section">
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">Search Experiences</legend>
+                    <div class="form-group mb-3">
+                        {{ form.search_type.label(class="sr-only") }}
+                        {% if form.search_type.errors %}
+                            {{ form.search_type(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.search_type.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.search_type(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group mb-1">
+                        {% if form.search_string.errors %}
+                            {{ form.search_string(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.search_string.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.search_string(class="form-control form-control-lg", placeholder="Search...") }}
+                        {% endif %}
+                    </div>
+                </fieldset>
+                <div class="form-group pt-3">
+                    {{ form.submit(class="btn btn-outline-secondary mb-2") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Trip experiences -->
+        <div class="col-md-6 content-section" id="trip-experiences-div">
+            <legend class="border-bottom mb-4">Trip Experiences</legend>
+
+        </div>
+
+        <!-- Buffer -->
+        <div class="col-md-auto">
+        </div>
+
+        <!-- Experience search results -->
+        <div class="col content-section" id="search-experiences-div">
+            {% if not search_type %}
+                <legend class="border-bottom mb-4">Search Results</legend>
+            {% elif search_type == 'location' %}
+                <legend class="border-bottom mb-4">Results for experience(s) in {{ search_string }}</legend>
+            {% else %}
+                <legend class="border-bottom mb-4">Results for experience(s) with keyword "{{ search_string }}"</legend>
+            {% endif %}
+
+            {% if experiences.total == 0 %}
+                <p>No results found.</p>
+            {% else %}
+                {% for experience in experiences.items %}
+                    <article class="media content-section exp-{{ experience.id }}">
+                        <div class="media-body">
+                            <!-- Title + Creator info -->
+                            <h2>
+                                <a class="article-title text-decoration-none"
+                                   href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a>
+                            </h2>
+                            <h5>
+                                Created by user {{ experience.author.username }}
+                            </h5>
+                            <h6 id="exp-{{ experience.id }}-location">
+                                {{ experience.location }}
+                            </h6>
+                            <!-- Display Experience image -->
+                            <a href="{{ url_for('experience', experience_id=experience.id) }}">
+                                <img class="img-rounded"
+                                     src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
+                            </a>
+                            <!-- Add to trip -->
+                            <div class="col text-center">
+                                <button type="button" class="btn btn-primary add-exp-button" id="exp-{{ experience.id }}">
+                                    Add to Trip
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock content %}

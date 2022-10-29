@@ -13,6 +13,7 @@
                 {% endif %}
                 <p class="text-secondary">Member since {{ current_user.date_account_created.strftime('%Y') }}</p>
                 <p class="text-secondary">Experiences Created: {{ exp_count }}</p>
+                <p class="text-secondary">Trips Created: {{ trip_count }}</p>
             </div>
         </div>
     </div>
@@ -60,7 +61,21 @@
                             {% endif %}
                         </dd>
                         <dt class="col-sm-3">Rating</dt>
-                        <dd class="col-sm-9">{{ experience.rating }}</dd>
+                        <dd class="col-sm-9">
+                            <!-- Show the average rating and star image -->
+                            {% if not experience.avg_rating %}
+                                <p>This Experience has not yet been rated.</p>
+                            {% else %}
+                                <ul>
+                                    <li style="display:inline-block;">
+                                        <img src="{{ url_for('static', filename='experience_pics/star.png') }}">
+                                    </li>
+                                    <li style="display:inline-block; padding-left: 10px;">
+                                        {{ experience.avg_rating|round(1) }} / 5
+                                    </li>
+                                </ul>
+                            {% endif %}
+                        </dd>
                         <dt class="col-sm-3">Keywords</dt>
                         <dd class="col-sm-9">
                             <!-- Display list of keywords -->
@@ -89,4 +104,14 @@
             </div>
         </article>
     {% endfor %}
+
+    <!-- Only display trip legend if the user has trips created -->
+    {% if trip_count > 0 %}
+        <legend class="border-bottom mb-3">My Trips</legend>
+
+        {% for trip in trips %}
+            <!-- TODO: Display trips here -->
+        {% endfor %}
+    {% endif %}
+
 {% endblock content %}}

@@ -1,6 +1,7 @@
 from datetime import datetime
 from CrowdSourcedTravelPlanner import db, login_manager
 from flask_login import UserMixin
+from sqlalchemy_utils import aggregated
 
 
 @login_manager.user_loader
@@ -56,7 +57,6 @@ class Experience(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     location = db.Column(db.String(100), nullable=False)
-    rating = db.Column(db.Float, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -64,5 +64,25 @@ class Experience(db.Model):
     longitude = db.Column(db.Float, nullable=True)  # Re-evaluate later
     keywords = db.relationship('Keyword', order_by=Keyword.id, back_populates='experience')
 
+    # Average rating attribute code adapted from https://sqlalchemy-utils.readthedocs.io/en/latest/aggregates.html.
+    @aggregated('ratings', db.Column(db.Numeric))
+    def avg_rating(self):
+        return db.func.avg(Rating.stars)
+
+    ratings = db.relationship("Rating")
+
     def __repr__(self):
         return f"Experience('{self.title}', '{self.date_posted}')"
+
+
+class Rating(db.Model):
+    """
+    Defines the database attributes for a user's rating of an Experience.  Used to calculate the average rating of the
+    Experience.  Code adapted from https://sqlalchemy-utils.readthedocs.io/en/latest/aggregates.html.
+    """
+    __tablename__ = 'rating'
+    id = db.Column(db.Integer, primary_key=True)
+    stars = db.Column(db.Integer)
+
+    experience_id = db.Column(db.Integer, db.ForeignKey('experience.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))

@@ -1,6 +1,6 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
 from flask import render_template, url_for, flash, redirect, request, abort
-from CrowdSourcedTravelPlanner.models import User, Experience, Keyword
+from CrowdSourcedTravelPlanner.models import User, Experience, Keyword, Rating
 from flask_login import login_user, current_user, logout_user, login_required
 from sqlalchemy import and_
 import os
@@ -29,14 +29,15 @@ def landing():
 
     # Check if user has set sort to "top-rated"
     if current_user.sort == 'top_rated':
-        experiences = Experience.query.order_by(Experience.rating.desc()).paginate(page=page, per_page=3)
+        experiences = Experience.query.order_by(Experience.avg_rating.desc()).paginate(page=page, per_page=3)
 
     # Check if user is logged in and set their location
     if current_user.is_authenticated and current_user.location != "":
         # Get all nearby experiences (under ~35 miles)
         nearby_experiences = Experience.query.filter(
             and_(Experience.longitude - current_user.longitude < 0.5, Experience.latitude - current_user.latitude < 0.5,
-                 current_user.longitude - Experience.longitude < 0.5, current_user.latitude - Experience.latitude < 0.5)).paginate(
+                 current_user.longitude - Experience.longitude < 0.5,
+                 current_user.latitude - Experience.latitude < 0.5)).paginate(
             page=nearby_page, per_page=10)
         return render_template('landing.html', experiences=experiences, nearby_experiences=nearby_experiences)
 
@@ -122,9 +123,14 @@ def profile():
     experiences = Experience.query.filter(Experience.author == current_user)
     exp_count = experiences.count()
 
+    # Get all trips created by the currently logged-in user
+    # TODO: Query all trips associated with user and update trip count.
+    trips = []
+    trip_count = 0
+
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('profile.html', title='My Profile', image_file=image_file, experiences=experiences,
-                           exp_count=exp_count)
+                           exp_count=exp_count, trips=trips, trip_count=trip_count)
 
 
 def save_profile_picture(form_picture):
@@ -236,7 +242,7 @@ def add_experience():
 
         # Create a new Experience object and set the author to the current user
         experience = Experience(title=form.title.data, location=form.location.data, description=form.description.data,
-                                rating=form.rating.data, image_file=picture_file, author=current_user)
+                                image_file=picture_file, author=current_user)
 
         # Get the latitude and longitude of the address entered on the form
         geolocation = get_geolocation(experience.location)
@@ -267,10 +273,23 @@ def add_experience():
 
 
 # Experience Details page
-@app.route("/experience/<int:experience_id>")
+@app.route("/experience/<int:experience_id>", methods=['GET', 'POST'])
 def experience(experience_id):
     experience = Experience.query.get_or_404(experience_id)
-    return render_template('experience.html', title=experience.title, experience=experience)
+
+    rating_form = forms.RatingForm()
+
+    if rating_form.validate_on_submit():
+        # Add the new rating to the list of ratings for the Experience
+        star_rating = rating_form.star_rating.data
+        experience.ratings.append(Rating(stars=star_rating, experience_id=experience.id, user_id=current_user.id))
+        db.session.commit()
+
+        # Flash a message indicating that the rating was saved
+        flash(f'Your rating was saved!', 'success')
+        return redirect(url_for('experience', experience_id=experience.id))
+
+    return render_template('experience.html', title=experience.title, experience=experience, rating_form=rating_form)
 
 
 # Update Experience page
@@ -296,7 +315,6 @@ def update_experience(experience_id):
         experience.title = form.title.data
         experience.description = form.description.data
         experience.location = form.location.data
-        experience.rating = form.rating.data
 
         # Get the latitude and longitude of the address entered on the form
         geolocation = get_geolocation(experience.location)
@@ -323,7 +341,6 @@ def update_experience(experience_id):
         form.title.data = experience.title
         form.description.data = experience.description
         form.location.data = experience.location
-        form.rating.data = experience.rating
 
         # Pre-fill the "Keywords" field by concatenating any existing keywords into a single string
         display_list = []
@@ -414,3 +431,57 @@ def keyword(keyword_text):
         .order_by(Experience.title) \
         .paginate(page=page, per_page=5)
     return render_template('keyword.html', experiences=experiences, keyword_text=keyword_text)
+
+
+# Create trip page.
+@app.route("/trip/create", methods=['GET', 'POST'])
+@login_required
+def create_trip():
+    form = forms.CreateTripForm()
+    display_image = 'trip_default.jpg'
+
+    if form.validate_on_submit():
+        # TODO: Write trip information to database
+
+        # Redirect to the Profile page after successful Trip creation
+        flash('Your Trip has been created!', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('create_trip.html', title='Create Trip', form=form, display_image=display_image,
+                           legend='Create Trip')
+
+
+# Update trip page.
+# TODO: Update route name dynamically with trip #
+@app.route("/trip/update", methods=['GET', 'POST'])
+@login_required
+def update_trip():
+    form = forms.SearchForm()
+
+    # TODO: Pull trip info from db.
+    trip_title, trip_image = 'My Trip to California', 'trip_default.jpg'
+
+    # Default values for form submittal.
+    experiences = search_type = search_string = None
+
+    if form.validate_on_submit():
+        search_type = form.search_type.data
+        search_string = form.search_string.data
+
+        # Set page number for pagination
+        page = request.args.get('page', 1, type=int)
+
+        # Get Experience results depending on whether search is by location or keyword
+        # TODO: Filter search results based on experiences already added to trip.
+        if search_type == 'location':
+            experiences = Experience.query.filter(Experience.location.like('%' + search_string + '%')) \
+                .order_by(Experience.title) \
+                .paginate(page=page, per_page=5)
+        elif search_type == 'keyword':
+            experiences = Experience.query \
+                .filter(Experience.keywords.any(Keyword.keyword_text.like('%' + search_string + '%'))) \
+                .order_by(Experience.title) \
+                .paginate(page=page, per_page=5)
+
+    return render_template('update_trip.html', form=form, experiences=experiences, search_type=search_type,
+                           search_string=search_string, trip_title=trip_title, trip_image=trip_image)
