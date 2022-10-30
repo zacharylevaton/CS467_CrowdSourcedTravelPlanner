@@ -1,6 +1,6 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
 from flask import render_template, url_for, flash, redirect, request, abort
-from CrowdSourcedTravelPlanner.models import User, Experience, Keyword
+from CrowdSourcedTravelPlanner.models import User, Experience, Keyword, Trip
 from flask_login import login_user, current_user, logout_user, login_required
 from sqlalchemy import and_
 import os
@@ -124,8 +124,8 @@ def profile():
 
     # Get all trips created by the currently logged-in user
     # TODO: Query all trips associated with user and update trip count.
-    trips = []
-    trip_count = 0
+    trips = Trip.query.filter(Trip.author == current_user)
+    trip_count = trips.count()
 
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('profile.html', title='My Profile', image_file=image_file, experiences=experiences,
@@ -420,6 +420,23 @@ def keyword(keyword_text):
         .paginate(page=page, per_page=5)
     return render_template('keyword.html', experiences=experiences, keyword_text=keyword_text)
 
+def save_trip_picture(form_picture):
+    """Saves a user-uploaded image to the Trip pictures folder and gives it a random filename."""
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)  # Get the original extension of the uploaded image
+    picture_fn = random_hex + f_ext
+
+    # Save the image file to the pictures folder
+    picture_path = os.path.join(app.root_path, 'static/trip_pics', picture_fn)
+
+    # Resize large images before saving
+    output_size = (500, 500)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    # Return the filename of the newly saved image
+    return picture_fn
 
 # Create trip page.
 @app.route("/trip/create", methods=['GET', 'POST'])
@@ -430,6 +447,17 @@ def create_trip():
 
     if form.validate_on_submit():
         # TODO: Write trip information to database
+        # Save the user-uploaded image to the file system
+        if form.picture.data:
+            picture_file = save_trip_picture(form.picture.data)
+        else:
+            picture_file = 'trip_default.jpg'
+        
+        trip = Trip(title=form.title.data, location=form.location.data, image_file=picture_file, author=current_user)
+
+        # Add the new Trip to the database
+        db.session.add(trip)
+        db.session.commit()
 
         # Redirect to the Profile page after successful Trip creation
         flash('Your Trip has been created!', 'success')
