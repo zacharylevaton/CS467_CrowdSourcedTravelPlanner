@@ -276,19 +276,14 @@ def add_experience():
 @app.route("/experience/<int:experience_id>", methods=['GET', 'POST'])
 def experience(experience_id):
     experience = Experience.query.get_or_404(experience_id)
-    current_rating = 0  # The logged-in user's current rating for the Experience
-
-    rating_form = forms.RatingForm()
 
     # Check if the logged-in user has already rated the Experience
     if current_user.is_authenticated:
         user_rating = Rating.query.filter_by(experience_id=experience.id, user_id=current_user.id).first()
         if user_rating:
-            current_rating = user_rating.stars
-
-    # # Pre-populate the rating selection form if the logged-in user has already rated it
-    # if user_rating:
-    #     rating_form.star_rating.data = user_rating.stars
+            rating_form = forms.RatingForm(star_rating=user_rating.stars)
+        else:
+            rating_form = forms.RatingForm()
 
     if rating_form.validate_on_submit():
         star_rating = rating_form.star_rating.data
@@ -310,8 +305,7 @@ def experience(experience_id):
         flash(f'Your rating was saved!', 'success')
         return redirect(url_for('experience', experience_id=experience.id))
 
-    return render_template('experience.html', title=experience.title, experience=experience, rating_form=rating_form,
-                           current_rating=current_rating)
+    return render_template('experience.html', title=experience.title, experience=experience, rating_form=rating_form)
 
 
 # Update Experience page

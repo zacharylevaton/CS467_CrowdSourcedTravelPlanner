@@ -61,7 +61,7 @@
                                 <li style="display:inline-block;">
                                     <img src="{{ url_for('static', filename='experience_pics/star.png') }}">
                                 </li>
-                                <li style="display:inline-block; padding-left: 10px;">
+                                <li style="display:inline-block; margin-left: 5px;">
                                     {{ experience.avg_rating|round(1) }} / 5
                                 </li>
                             </ul>
@@ -71,17 +71,9 @@
                             <form method="POST" action="">
                                 {{ rating_form.hidden_tag() }}
                                 <ul>
-                                    <!-- Print only "Your Rating" if the user has not rated this Experience before -->
-                                    {% if current_rating == 0 %}
-                                        <li style="display:inline-block; padding-left: 0px;">
-                                            {{ rating_form.star_rating.label(class="form-control-label") }}
-                                        </li>
-                                    <!-- Otherwise, also show the user's current rating for the Experience -->
-                                    {% else %}
-                                        <li style="display:inline-block; padding-left: 0px;">
-                                            {{ rating_form.star_rating.label(class="form-control-label") }}: {{ current_rating }}
-                                        </li>
-                                    {% endif %}
+                                    <li style="display:inline-block; padding-left: 0px;">
+                                        {{ rating_form.star_rating.label(class="form-control-label") }}:
+                                    </li>
                                     <li style="display:inline-block; padding-left: 10px;">
                                         {% if rating_form.star_rating.errors %}
                                             {{ rating_form.star_rating(class="form-control form-control-lg is-invalid") }}
