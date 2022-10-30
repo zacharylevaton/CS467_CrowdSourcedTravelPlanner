@@ -276,20 +276,42 @@ def add_experience():
 @app.route("/experience/<int:experience_id>", methods=['GET', 'POST'])
 def experience(experience_id):
     experience = Experience.query.get_or_404(experience_id)
+    current_rating = 0  # The logged-in user's current rating for the Experience
 
     rating_form = forms.RatingForm()
 
+    # Check if the logged-in user has already rated the Experience
+    if current_user.is_authenticated:
+        user_rating = Rating.query.filter_by(experience_id=experience.id, user_id=current_user.id).first()
+        if user_rating:
+            current_rating = user_rating.stars
+
+    # # Pre-populate the rating selection form if the logged-in user has already rated it
+    # if user_rating:
+    #     rating_form.star_rating.data = user_rating.stars
+
     if rating_form.validate_on_submit():
-        # Add the new rating to the list of ratings for the Experience
         star_rating = rating_form.star_rating.data
-        experience.ratings.append(Rating(stars=star_rating, experience_id=experience.id, user_id=current_user.id))
+
+        if user_rating:  # If the logged-in user is changing their previous rating for the Experience
+            # If the user picks "Select" from the dropdown, it signals that they are removing their rating.
+            if star_rating == 0:
+                db.session.delete(user_rating)  # Remove the user's rating so that it no longer affects the average
+            else:
+                user_rating.stars = star_rating  # Update the user's score for the Experience
+        # Otherwise, add the new rating to the list of ratings for the Experience
+        else:
+            experience.ratings.append(Rating(stars=star_rating, experience_id=experience.id, user_id=current_user.id))
+
+        # Save the changes to the database
         db.session.commit()
 
         # Flash a message indicating that the rating was saved
         flash(f'Your rating was saved!', 'success')
         return redirect(url_for('experience', experience_id=experience.id))
 
-    return render_template('experience.html', title=experience.title, experience=experience, rating_form=rating_form)
+    return render_template('experience.html', title=experience.title, experience=experience, rating_form=rating_form,
+                           current_rating=current_rating)
 
 
 # Update Experience page

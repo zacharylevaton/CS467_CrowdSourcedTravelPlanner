@@ -128,5 +128,5 @@ class CreateTripForm(FlaskForm):
 class RatingForm(FlaskForm):
     star_rating = SelectField('Your Rating',
                               choices=[(0, 'Select'), (1, '1 - Very Bad'), (2, '2 - Bad'), (3, '3 - Average'),
-                                       (4, '4 - Good'), (5, '5 - Very Good')])
+                                       (4, '4 - Good'), (5, '5 - Very Good')], coerce=int)
     submit = SubmitField('Submit')

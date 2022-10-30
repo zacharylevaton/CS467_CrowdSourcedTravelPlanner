@@ -51,7 +51,7 @@
                         {% endif %}
                     </dd>
                     <!-- Average Rating display -->
-                    <dt class="col-sm-3">Rating</dt>
+                    <dt class="col-sm-3">Average Rating</dt>
                     <dd class="col-sm-9">
                         <!-- Show the average rating and star image -->
                         {% if not experience.avg_rating %}
@@ -71,9 +71,17 @@
                             <form method="POST" action="">
                                 {{ rating_form.hidden_tag() }}
                                 <ul>
-                                    <li style="display:inline-block; padding-left: 0px;">
-                                        {{ rating_form.star_rating.label(class="form-control-label") }}
-                                    </li>
+                                    <!-- Print only "Your Rating" if the user has not rated this Experience before -->
+                                    {% if current_rating == 0 %}
+                                        <li style="display:inline-block; padding-left: 0px;">
+                                            {{ rating_form.star_rating.label(class="form-control-label") }}
+                                        </li>
+                                    <!-- Otherwise, also show the user's current rating for the Experience -->
+                                    {% else %}
+                                        <li style="display:inline-block; padding-left: 0px;">
+                                            {{ rating_form.star_rating.label(class="form-control-label") }}: {{ current_rating }}
+                                        </li>
+                                    {% endif %}
                                     <li style="display:inline-block; padding-left: 10px;">
                                         {% if rating_form.star_rating.errors %}
                                             {{ rating_form.star_rating(class="form-control form-control-lg is-invalid") }}

@@ -82,7 +82,9 @@ class Rating(db.Model):
     """
     __tablename__ = 'rating'
     id = db.Column(db.Integer, primary_key=True)
-    stars = db.Column(db.Integer)
-
+    stars = db.Column(db.Integer)   # Star rating entered in the form on the Experience Details page
     experience_id = db.Column(db.Integer, db.ForeignKey('experience.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))   # Database ID of currently logged-in user
+
+    def __repr__(self):
+        return f"Rating('Experience: {self.experience_id}', 'User: {self.user_id}', 'Stars: {self.stars}')"
