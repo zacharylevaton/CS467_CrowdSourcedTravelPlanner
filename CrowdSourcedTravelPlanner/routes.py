@@ -284,6 +284,8 @@ def experience(experience_id):
             rating_form = forms.RatingForm(star_rating=user_rating.stars)
         else:
             rating_form = forms.RatingForm()
+    else:
+        rating_form = forms.RatingForm()
 
     if rating_form.validate_on_submit():
         star_rating = rating_form.star_rating.data
