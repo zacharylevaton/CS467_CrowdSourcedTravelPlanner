@@ -29,16 +29,15 @@ h1, h2, h3, h4, h5, h6 {
   border: 1px solid #dddddd;
   border-radius: 3px;
   margin-bottom: 20px;
+  height: 100%;
 }
 
 img {
-  max-width: 100%;
+  width: 100%;
 }
 
-.img-rounded {
-  border-radius:6px;
+button {
+  margin-top: 5px;
 }
 
-p {
-  padding-top: 10px;
-}
+

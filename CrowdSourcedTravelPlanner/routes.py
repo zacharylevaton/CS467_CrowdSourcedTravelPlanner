@@ -1,6 +1,6 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
 from flask import render_template, url_for, flash, redirect, request, abort
-from CrowdSourcedTravelPlanner.models import User, Experience, Keyword
+from CrowdSourcedTravelPlanner.models import User, Experience, Keyword, Trip
 from flask_login import login_user, current_user, logout_user, login_required
 from sqlalchemy import and_
 import os
@@ -37,7 +37,7 @@ def landing():
         nearby_experiences = Experience.query.filter(
             and_(Experience.longitude - current_user.longitude < 0.5, Experience.latitude - current_user.latitude < 0.5,
                  current_user.longitude - Experience.longitude < 0.5, current_user.latitude - Experience.latitude < 0.5)).paginate(
-            page=nearby_page, per_page=10)
+            page=nearby_page, per_page=3)
         return render_template('landing.html', experiences=experiences, nearby_experiences=nearby_experiences)
 
     return render_template('landing.html', experiences=experiences)
@@ -124,8 +124,8 @@ def profile():
 
     # Get all trips created by the currently logged-in user
     # TODO: Query all trips associated with user and update trip count.
-    trips = []
-    trip_count = 0
+    trips = Trip.query.filter(Trip.author == current_user)
+    trip_count = trips.count()
 
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('profile.html', title='My Profile', image_file=image_file, experiences=experiences,
@@ -420,6 +420,29 @@ def keyword(keyword_text):
         .paginate(page=page, per_page=5)
     return render_template('keyword.html', experiences=experiences, keyword_text=keyword_text)
 
+def save_trip_picture(form_picture):
+    """Saves a user-uploaded image to the Trip pictures folder and gives it a random filename."""
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)  # Get the original extension of the uploaded image
+    picture_fn = random_hex + f_ext
+
+    # Save the image file to the pictures folder
+    picture_path = os.path.join(app.root_path, 'static/trip_pics', picture_fn)
+
+    # Resize large images before saving
+    output_size = (500, 500)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    # Return the filename of the newly saved image
+    return picture_fn
+
+# Trip Details page
+@app.route("/trip/<int:trip_id>")
+def trip(trip_id):
+    trip = Trip.query.get_or_404(trip_id)
+    return render_template('trip.html', title=trip.title, trip=trip)
 
 # Create trip page.
 @app.route("/trip/create", methods=['GET', 'POST'])
@@ -429,7 +452,17 @@ def create_trip():
     display_image = 'trip_default.jpg'
 
     if form.validate_on_submit():
-        # TODO: Write trip information to database
+        # Save the user-uploaded image to the file system
+        if form.picture.data:
+            picture_file = save_trip_picture(form.picture.data)
+        else:
+            picture_file = 'trip_default.jpg'
+        
+        trip = Trip(title=form.title.data, location=form.location.data, image_file=picture_file, author=current_user)
+
+        # Add the new Trip to the database
+        db.session.add(trip)
+        db.session.commit()
 
         # Redirect to the Profile page after successful Trip creation
         flash('Your Trip has been created!', 'success')
@@ -437,3 +470,73 @@ def create_trip():
 
     return render_template('create_trip.html', title='Create Trip', form=form, display_image=display_image,
                            legend='Create Trip')
+
+
+# Update trip page.
+# TODO: Update route name dynamically with trip #
+@app.route("/trip/update", methods=['GET', 'POST'])
+@login_required
+def update_trip():
+    form = forms.SearchForm()
+
+    # TODO: Pull trip info from db.
+    trip_title, trip_image = 'My Trip to California', 'trip_default.jpg'
+
+    # Default values for form submittal.
+    experiences = search_type = search_string = None
+
+    if form.validate_on_submit():
+        search_type = form.search_type.data
+        search_string = form.search_string.data
+
+        # Set page number for pagination
+        page = request.args.get('page', 1, type=int)
+
+        # Get Experience results depending on whether search is by location or keyword
+        # TODO: Filter search results based on experiences already added to trip.
+        if search_type == 'location':
+            experiences = Experience.query.filter(Experience.location.like('%' + search_string + '%')) \
+                .order_by(Experience.title) \
+                .paginate(page=page, per_page=5)
+        elif search_type == 'keyword':
+            experiences = Experience.query \
+                .filter(Experience.keywords.any(Keyword.keyword_text.like('%' + search_string + '%'))) \
+                .order_by(Experience.title) \
+                .paginate(page=page, per_page=5)
+
+    return render_template('update_trip.html', form=form, experiences=experiences, search_type=search_type,
+                           search_string=search_string, trip_title=trip_title, trip_image=trip_image)
+
+
+# Delete Trip button
+@app.route("/trip/<int:trip_id>/delete", methods=['POST'])
+@login_required
+def delete_trip(trip_id):
+    
+    trip = Trip.query.get_or_404(trip_id)
+
+    # Make sure only the Trip's author can delete it
+    if trip.author != current_user:
+        abort(403)
+
+    # Delete the Trip and redirect to the Landing page
+    db.session.delete(trip)
+    db.session.commit()
+    flash('Your Trip has been deleted!', 'success')
+    return redirect(url_for('landing'))
+
+
+# User Trips page
+@app.route("/user-trips/<string:username>")
+def user_trips(username):
+    # Set page number for pagination
+    page = request.args.get('page', 1, type=int)
+
+    # Find the username of the User
+    user = User.query.filter_by(username=username).first_or_404()
+
+    # Query for all the Trips created by the selected user
+    trips = Trip.query.filter_by(author=user) \
+        .order_by(Trip.title.desc()) \
+        .paginate(page=page, per_page=5)
+    return render_template('user_trips.html', trips=trips, user=user)

@@ -23,6 +23,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     date_account_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     experiences = db.relationship('Experience', backref='author', lazy=True)
+    trips = db.relationship('Trip', backref='author', lazy=True)
     location = db.Column(db.String(100), nullable=True, default="")
     latitude = db.Column(db.Float, nullable=True)  # Temporarily nullable for now while I'm testing
     longitude = db.Column(db.Float, nullable=True)  # Re-evaluate later
@@ -66,3 +67,16 @@ class Experience(db.Model):
 
     def __repr__(self):
         return f"Experience('{self.title}', '{self.date_posted}')"
+
+class Trip(db.Model):
+    """
+    Defines the database attributes for user-submitted Trips.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, default='trips_default.jpg')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    def __repr__(self):
+        return f"Trip('{self.title}', '{self.location}', '{self.image_file}')"
