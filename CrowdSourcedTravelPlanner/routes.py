@@ -122,9 +122,14 @@ def profile():
     experiences = Experience.query.filter(Experience.author == current_user)
     exp_count = experiences.count()
 
+    # Get all trips created by the currently logged-in user
+    # TODO: Query all trips associated with user and update trip count.
+    trips = []
+    trip_count = 0
+
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('profile.html', title='My Profile', image_file=image_file, experiences=experiences,
-                           exp_count=exp_count)
+                           exp_count=exp_count, trips=trips, trip_count=trip_count)
 
 
 def save_profile_picture(form_picture):
@@ -414,3 +419,21 @@ def keyword(keyword_text):
         .order_by(Experience.title) \
         .paginate(page=page, per_page=5)
     return render_template('keyword.html', experiences=experiences, keyword_text=keyword_text)
+
+
+# Create trip page.
+@app.route("/trip/create", methods=['GET', 'POST'])
+@login_required
+def create_trip():
+    form = forms.CreateTripForm()
+    display_image = 'trip_default.jpg'
+
+    if form.validate_on_submit():
+        # TODO: Write trip information to database
+
+        # Redirect to the Profile page after successful Trip creation
+        flash('Your Trip has been created!', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('create_trip.html', title='Create Trip', form=form, display_image=display_image,
+                           legend='Create Trip')
