@@ -16,7 +16,14 @@
                     <a class="mr-2 text-decoration-none" href="{{ url_for('user_trips', username=trip.author.username) }}">{{ trip.author.username }}</a>
                 </li>
             </ul>
-            <!-- TODO: Add trip update and delete functionality and buttons -->
+            <!-- TODO: Add trip update functionality and buttons -->
+            <div class="article-metadata">
+                {% if trip.author == current_user %}
+                    <div>
+                        <button type="button" class="btn btn-danger btn-sm m-1" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
+                    </div>
+                {% endif %}
+            </div>
             <h2><a class="article-title text-decoration-none"
                    href="{{ url_for('trip', trip_id=trip.id) }}">{{ trip.title }}</a></h2>
             <!-- Display Trip image with link to Trip page -->
@@ -34,4 +41,23 @@
             </div>
         </div>
     </article>
+    <!-- Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="deleteModalLabel">Delete Trip?</h5>
+              <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <form action="{{ url_for('delete_trip', trip_id=trip.id) }}" method="POST">
+                <input class="btn btn-danger" type="submit" value="Delete">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
 {% endblock content %}

@@ -508,6 +508,24 @@ def update_trip():
                            search_string=search_string, trip_title=trip_title, trip_image=trip_image)
 
 
+# Delete Trip button
+@app.route("/trip/<int:trip_id>/delete", methods=['POST'])
+@login_required
+def delete_trip(trip_id):
+    
+    trip = Trip.query.get_or_404(trip_id)
+
+    # Make sure only the Trip's author can delete it
+    if trip.author != current_user:
+        abort(403)
+
+    # Delete the Trip and redirect to the Landing page
+    db.session.delete(trip)
+    db.session.commit()
+    flash('Your Trip has been deleted!', 'success')
+    return redirect(url_for('landing'))
+
+
 # User Trips page
 @app.route("/user-trips/<string:username>")
 def user_trips(username):
