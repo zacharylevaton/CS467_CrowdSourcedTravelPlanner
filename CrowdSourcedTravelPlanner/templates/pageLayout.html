@@ -45,8 +45,14 @@
         <title>Create Trip</title>
         <link href="{{ url_for('static', filename='create_trip.css') }}" rel="stylesheet" type="text/css">
     {% elif request.endpoint == 'update_trip' %}
-        <title>Create Trip</title>
+        <title>Update Trip</title>
         <link href="{{ url_for('static', filename='update_trip.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'user_trips' %}
+        <title>User Trips</title>
+        <link href="{{ url_for('static', filename='user_trips.css') }}" rel="stylesheet" type="text/css">
+    {% elif request.endpoint == 'trip' %}
+        <title>Trip</title>
+        <link href="{{ url_for('static', filename='trip.css') }}" rel="stylesheet" type="text/css">
     {% endif %}
 
 </head>

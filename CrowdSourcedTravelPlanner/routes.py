@@ -37,7 +37,7 @@ def landing():
         nearby_experiences = Experience.query.filter(
             and_(Experience.longitude - current_user.longitude < 0.5, Experience.latitude - current_user.latitude < 0.5,
                  current_user.longitude - Experience.longitude < 0.5, current_user.latitude - Experience.latitude < 0.5)).paginate(
-            page=nearby_page, per_page=10)
+            page=nearby_page, per_page=3)
         return render_template('landing.html', experiences=experiences, nearby_experiences=nearby_experiences)
 
     return render_template('landing.html', experiences=experiences)
@@ -438,6 +438,12 @@ def save_trip_picture(form_picture):
     # Return the filename of the newly saved image
     return picture_fn
 
+# Trip Details page
+@app.route("/trip/<int:trip_id>")
+def trip(trip_id):
+    trip = Trip.query.get_or_404(trip_id)
+    return render_template('trip.html', title=trip.title, trip=trip)
+
 # Create trip page.
 @app.route("/trip/create", methods=['GET', 'POST'])
 @login_required
@@ -446,7 +452,6 @@ def create_trip():
     display_image = 'trip_default.jpg'
 
     if form.validate_on_submit():
-        # TODO: Write trip information to database
         # Save the user-uploaded image to the file system
         if form.picture.data:
             picture_file = save_trip_picture(form.picture.data)
@@ -501,3 +506,19 @@ def update_trip():
 
     return render_template('update_trip.html', form=form, experiences=experiences, search_type=search_type,
                            search_string=search_string, trip_title=trip_title, trip_image=trip_image)
+
+
+# User Trips page
+@app.route("/user-trips/<string:username>")
+def user_trips(username):
+    # Set page number for pagination
+    page = request.args.get('page', 1, type=int)
+
+    # Find the username of the User
+    user = User.query.filter_by(username=username).first_or_404()
+
+    # Query for all the Trips created by the selected user
+    trips = Trip.query.filter_by(author=user) \
+        .order_by(Trip.title.desc()) \
+        .paginate(page=page, per_page=5)
+    return render_template('user_trips.html', trips=trips, user=user)
