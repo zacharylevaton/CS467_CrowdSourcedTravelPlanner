@@ -260,6 +260,12 @@ def add_experience():
             keyword_list.append(Keyword(keyword_text=current_keyword))
         experience.keywords = keyword_list
 
+        # Save the star rating for the Experience if the user has selected a score
+        star_rating = form.star_rating.data
+
+        if star_rating > 0:
+            experience.ratings.append(Rating(stars=star_rating, experience_id=experience.id, user_id=current_user.id))
+
         # Add the new Experience to the database
         db.session.add(experience)
         db.session.commit()
@@ -321,7 +327,16 @@ def update_experience(experience_id):
     if experience.author != current_user:
         abort(403)
 
-    form = forms.ExperienceForm()
+    # Check if the logged-in user has already rated the Experience
+    if current_user.is_authenticated:
+        user_rating = Rating.query.filter_by(experience_id=experience.id, user_id=current_user.id).first()
+        if user_rating:
+            form = forms.ExperienceForm(star_rating=user_rating.stars)
+        else:
+            form = forms.ExperienceForm()
+    else:
+        form = forms.ExperienceForm()
+    form.submit.label.text = 'Update'
 
     # Update the Experience details after form submission
     if form.validate_on_submit():
@@ -349,6 +364,19 @@ def update_experience(experience_id):
         for current_keyword in received_keywords:
             keyword_list.append(Keyword(keyword_text=current_keyword))
         experience.keywords = keyword_list
+
+        # Save the user's star rating for their Experience if they have selected one
+        star_rating = form.star_rating.data
+
+        if user_rating:  # If the logged-in user is changing their previous rating for the Experience
+            # If the user picks "Select" from the dropdown, it signals that they are removing their rating.
+            if star_rating == 0:
+                db.session.delete(user_rating)  # Remove the user's rating so that it no longer affects the average
+            else:
+                user_rating.stars = star_rating  # Update the user's score for the Experience
+        # Otherwise, add the new rating to the list of ratings for the Experience
+        else:
+            experience.ratings.append(Rating(stars=star_rating, experience_id=experience.id, user_id=current_user.id))
 
         # Save changes to the database
         db.session.commit()

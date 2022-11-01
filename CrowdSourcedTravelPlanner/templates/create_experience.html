@@ -58,6 +58,26 @@
                         {{ form.keywords(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
+                <!-- Rating selection dropdown -->
+                <div class="form-group mb-3 pt-1">
+                    <ul style="padding-left: 0px";>
+                        <li style="display:inline-block; padding-left: 0px;">
+                            {{ form.star_rating.label(class="form-control-label") }}:
+                        </li>
+                        <li style="display:inline-block; padding-left: 10px;">
+                            {% if form.star_rating.errors %}
+                                {{ form.star_rating(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.star_rating.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.star_rating(class="form-control") }}
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
                 <!-- Show preview of the Experience's current image for the "Add Experience" page -->
                 <div>
                     <p>Current Image</p>
