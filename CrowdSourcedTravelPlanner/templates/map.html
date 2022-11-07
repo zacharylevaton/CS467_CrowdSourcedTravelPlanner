@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<head>    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_00cd2321ff81924890c572ffbb74efb5 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+            </style>
+        
+</head>
+<body>    
+    
+            <div class="folium-map" id="map_00cd2321ff81924890c572ffbb74efb5" ></div>
+        
+</body>
+<script>    
+    
+            var map_00cd2321ff81924890c572ffbb74efb5 = L.map(
+                "map_00cd2321ff81924890c572ffbb74efb5",
+                {
+                    center: [0.0, 0.0],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 2,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_ff32adc8092a211c78d4886e66e8c3ef = L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {"attribution": "Data by \u0026copy; \u003ca href=\"http://openstreetmap.org\"\u003eOpenStreetMap\u003c/a\u003e, under \u003ca href=\"http://www.openstreetmap.org/copyright\"\u003eODbL\u003c/a\u003e.", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_00cd2321ff81924890c572ffbb74efb5);
+        
+    
+            var marker_26bd1e6d7a03d627b1ab39f5d042a9b8 = L.marker(
+                [62.0449, -7.0323],
+                {}
+            ).addTo(map_00cd2321ff81924890c572ffbb74efb5);
+        
+    
+        var popup_15b8b4df6b1b783b5cb4b26e694b1616 = L.popup({"maxWidth": 300, "minWidth": 100});
+
+        
+            
+                var html_77765504874c3924af558408ca4c9708 = $(`<div id="html_77765504874c3924af558408ca4c9708" style="width: 100.0%; height: 100.0%;"><a href='/experience/1' target='_blank' rel='noopener noreferrer'>Experience 1</a><br><br>Faroe Islands<br><br><a href='/experience/1' target='_blank' rel='noopener noreferrer'><img class='img-rounded' src='/static/experience_pics/70af62cb4346e533.jpg' width='200'></a></div>`)[0];
+                popup_15b8b4df6b1b783b5cb4b26e694b1616.setContent(html_77765504874c3924af558408ca4c9708);
+            
+        
+
+        marker_26bd1e6d7a03d627b1ab39f5d042a9b8.bindPopup(popup_15b8b4df6b1b783b5cb4b26e694b1616)
+        ;
+
+        
+    
+    
+            marker_26bd1e6d7a03d627b1ab39f5d042a9b8.bindTooltip(
+                `<div>
+                     <p><strong>Experience 1</strong></p><p>Faroe Islands</p><p>Click for more information</p>
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_5b0056137c320b001c7bef130def712a = L.marker(
+                [60.5, 9.1],
+                {}
+            ).addTo(map_00cd2321ff81924890c572ffbb74efb5);
+        
+    
+        var popup_6f41effab2dc6dacadd582388cbcfae3 = L.popup({"maxWidth": 300, "minWidth": 100});
+
+        
+            
+                var html_75e1227849fee185cd592916ca4db825 = $(`<div id="html_75e1227849fee185cd592916ca4db825" style="width: 100.0%; height: 100.0%;"><a href='/experience/2' target='_blank' rel='noopener noreferrer'>Experience 2</a><br><br>Norway<br><br><a href='/experience/2' target='_blank' rel='noopener noreferrer'><img class='img-rounded' src='/static/experience_pics/d9d4c9c2e05f7ba5.jpg' width='200'></a></div>`)[0];
+                popup_6f41effab2dc6dacadd582388cbcfae3.setContent(html_75e1227849fee185cd592916ca4db825);
+            
+        
+
+        marker_5b0056137c320b001c7bef130def712a.bindPopup(popup_6f41effab2dc6dacadd582388cbcfae3)
+        ;
+
+        
+    
+    
+            marker_5b0056137c320b001c7bef130def712a.bindTooltip(
+                `<div>
+                     <p><strong>Experience 2</strong></p><p>Norway</p><p>Click for more information</p>
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_8183492da7dea3feefc82584a98531ab = L.marker(
+                [12.609, -85.2937],
+                {}
+            ).addTo(map_00cd2321ff81924890c572ffbb74efb5);
+        
+    
+        var popup_195260b50bc71972f7aeecff36b5ec77 = L.popup({"maxWidth": 300, "minWidth": 100});
+
+        
+            
+                var html_64be45bdffabc574c777343421083349 = $(`<div id="html_64be45bdffabc574c777343421083349" style="width: 100.0%; height: 100.0%;"><a href='/experience/5' target='_blank' rel='noopener noreferrer'>Nicaragua</a><br><br>Nicaragua<br><br><a href='/experience/5' target='_blank' rel='noopener noreferrer'><img class='img-rounded' src='/static/experience_pics/771d4b4784f7457d.jpg' width='200'></a></div>`)[0];
+                popup_195260b50bc71972f7aeecff36b5ec77.setContent(html_64be45bdffabc574c777343421083349);
+            
+        
+
+        marker_8183492da7dea3feefc82584a98531ab.bindPopup(popup_195260b50bc71972f7aeecff36b5ec77)
+        ;
+
+        
+    
+    
+            marker_8183492da7dea3feefc82584a98531ab.bindTooltip(
+                `<div>
+                     <p><strong>Nicaragua</strong></p><p>Nicaragua</p><p>Click for more information</p>
+                 </div>`,
+                {"sticky": true}
+            );
+        
+    
+            var marker_496d6cd3781dfa870fee43b47c5c4be1 = L.marker(
+                [41.8826, -87.6225],
+                {}
+            ).addTo(map_00cd2321ff81924890c572ffbb74efb5);
+        
+    
+        var popup_bcd808cde80b952f98c380c33aba6c7d = L.popup({"maxWidth": 300, "minWidth": 100});
+
+        
+            
+                var html_0c806be56d7ff30ebf0cecbe28bbc897 = $(`<div id="html_0c806be56d7ff30ebf0cecbe28bbc897" style="width: 100.0%; height: 100.0%;"><a href='/experience/6' target='_blank' rel='noopener noreferrer'>The Bean (Cloud Gate)</a><br><br>Millennium Park, Chicago, IL<br><br><a href='/experience/6' target='_blank' rel='noopener noreferrer'><img class='img-rounded' src='/static/experience_pics/8d187a63bdcbfd91.jpg' width='200'></a></div>`)[0];
+                popup_bcd808cde80b952f98c380c33aba6c7d.setContent(html_0c806be56d7ff30ebf0cecbe28bbc897);
+            
+        
+
+        marker_496d6cd3781dfa870fee43b47c5c4be1.bindPopup(popup_bcd808cde80b952f98c380c33aba6c7d)
+        ;
+
+        
+    
+    
+            marker_496d6cd3781dfa870fee43b47c5c4be1.bindTooltip(
+                `<div>
+                     <p><strong>The Bean (Cloud Gate)</strong></p><p>Millennium Park, Chicago, IL</p><p>Click for more information</p>
+                 </div>`,
+                {"sticky": true}
+            );
+        
+</script>

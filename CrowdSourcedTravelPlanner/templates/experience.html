@@ -35,7 +35,7 @@
                      src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
             </a>
             <!-- Bootstrap Detail List -->
-            <div class="container" style="margin-top: 20px;">
+            <div class="container" style="margin-top: 20px">
                 <dl class="row">
                     <dt class="col-sm-3">Description</dt>
                     <dd class="col-sm-9">{{ experience.description }}</dd>
@@ -118,6 +118,12 @@
                         {% endif %}
                     </dd>
                 </dl>
+            </div>
+            <!-- Folium map -->
+            <div>
+                {% if folium_map %}
+                    <iframe class="map", src="/map" width="600" height="600"></iframe>
+                {% endif %}
             </div>
         </div>
     </article>

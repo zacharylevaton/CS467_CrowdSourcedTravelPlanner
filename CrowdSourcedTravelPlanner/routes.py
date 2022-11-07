@@ -8,6 +8,7 @@ import secrets
 from PIL import Image
 import requests
 import urllib.parse
+import folium
 
 
 # Landing page
@@ -283,6 +284,16 @@ def add_experience():
 def experience(experience_id):
     experience = Experience.query.get_or_404(experience_id)
 
+    # Generate Folium map. Code adapted from
+    # https://stackoverflow.com/questions/37379374/insert-the-folium-maps-into-the-jinja-template/60031784#60031784
+    folium_map = None
+    if experience.latitude != -200 and experience.longitude != -200:
+        start_coords = (experience.latitude, experience.longitude)
+        folium_map = folium.Map(location=start_coords, zoom_start=10)
+        popup = folium.Popup("<strong>" + experience.title + "</strong>", max_width=300)
+        folium.Marker(location=start_coords, popup=popup, tooltip="Click for more information").add_to(folium_map)
+        folium_map.save('CrowdSourcedTravelPlanner/templates/map.html')
+
     # Check if the logged-in user has already rated the Experience
     if current_user.is_authenticated:
         user_rating = Rating.query.filter_by(experience_id=experience.id, user_id=current_user.id).first()
@@ -313,7 +324,14 @@ def experience(experience_id):
         flash(f'Your rating was saved!', 'success')
         return redirect(url_for('experience', experience_id=experience.id))
 
-    return render_template('experience.html', title=experience.title, experience=experience, rating_form=rating_form)
+    return render_template('experience.html', title=experience.title, experience=experience, rating_form=rating_form,
+                           folium_map=folium_map)
+
+
+# Folium map display
+@app.route('/map')
+def map():
+    return render_template('map.html')
 
 
 # Update Experience page
@@ -438,6 +456,25 @@ def user_experiences(username):
 @app.route("/search", methods=['GET', 'POST'])
 def search():
     form = forms.SearchForm()
+
+    # Query the database for all Experiences with valid locations
+    map_experiences = Experience.query.filter(Experience.latitude != -200, Experience.longitude != -200).all()
+
+    folium_map = folium.Map(location=[0, 0], zoom_start=2)
+
+    for exp in map_experiences:
+        exp_coords = (exp.latitude, exp.longitude)
+        popup_text = "<a href='" + url_for('experience',
+                                           experience_id=exp.id) \
+                     + "' target='_blank' rel='noopener noreferrer'>" + exp.title + "</a><br><br>" + exp.location \
+                     + "<br><br><a href='" + url_for('experience',
+                                                     experience_id=exp.id) + "' target='_blank' rel='noopener noreferrer'><img class='img-rounded' src='" \
+                     + url_for('static', filename='experience_pics/' + exp.image_file) + "' width='200'></a>"
+        popup = folium.Popup(popup_text, min_width=100, max_width=300)
+        tooltip = folium.Tooltip("<p><strong>" + exp.title + "</strong></p><p>" + exp.location + "</p><p>Click for more information</p>")
+        folium.Marker(location=exp_coords, popup=popup, tooltip=tooltip).add_to(folium_map)
+
+    folium_map.save('CrowdSourcedTravelPlanner/templates/map.html')
 
     # Display results after submitting Search form
     if form.validate_on_submit():
