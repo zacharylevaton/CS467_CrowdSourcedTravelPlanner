@@ -17,6 +17,15 @@ $(document).ready(function () {
 
         // Remove the experience from search.
         experience_article.remove();
+
+        // Obtain trip + experience IDs for database writing.
+        var expID = experience_identifier.split("-").pop();
+        var tripID = $('#trip-id').text();
+
+        // POST request to add experience to trip.
+        $.post( "/add_experience_to_trip",
+                {"expID" : expID, "tripID" : tripID}
+              );
     });
 
     $(document).on('click','.remove-exp-button', function() {
@@ -35,12 +44,21 @@ $(document).ready(function () {
         // Clone the experience to my trip if it matches current search.
         var search_string = $('#search_string').val().toLowerCase();
         var exp_location = $('#' + experience_identifier +'-location').text().toLowerCase();
-        if (exp_location.indexOf(search_string) >= 0) {
+        if (search_string != "" && exp_location.indexOf(search_string) >= 0) {
             experience_article.clone().appendTo(search_experience_container);
         }
 
         // Remove the experience from search.
         experience_article.remove();
+
+        // Obtain trip + experience IDs for database deleting.
+        var expID = experience_identifier.split("-").pop();
+        var tripID = $('#trip-id').text();
+
+        // POST request to remove experience from trip.
+        $.post( "/delete_experience_from_trip",
+                {"expID" : expID, "tripID" : tripID}
+              );
     });
 
 
