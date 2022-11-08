@@ -21,6 +21,7 @@
                 {% if trip.author == current_user %}
                     <div>
                         <button type="button" class="btn btn-danger btn-sm m-1" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</button>
+                        <button type="button" class="btn btn-info btn-sm m-1" data-bs-toggle="modal" data-bs-target="#updateModal">Update</button>
                     </div>
                 {% endif %}
             </div>
@@ -60,4 +61,23 @@
           </div>
         </div>
       </div>
+    <!-- Modal -->
+    <div class="modal fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="updateModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateModalLabel">Update Trip?</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form action="{{ url_for('update_trip', trip_id=trip.id) }}" method="POST">
+                        <input class="btn btn-info" type="submit" value="Update">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock content %}

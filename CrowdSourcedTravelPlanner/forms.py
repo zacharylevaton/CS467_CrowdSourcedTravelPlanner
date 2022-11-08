@@ -104,8 +104,12 @@ class ExperienceForm(FlaskForm):
     title = StringField('Title', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     location = StringField('Location', validators=[DataRequired()])
-    rating = DecimalField('Rating', validators=[DataRequired()])
     picture = FileField('Upload Experience Picture', validators=[FileAllowed(['jpg', 'png'])])
+
+    # Rating selection dropdown to allow the user to optionally rate their new Experience
+    star_rating = SelectField('Your Rating',
+                              choices=[(0, 'Select'), (1, '1 - Very Bad'), (2, '2 - Bad'), (3, '3 - Average'),
+                                       (4, '4 - Good'), (5, '5 - Very Good')], coerce=int)
 
     # At least 1 keyword is required for now during testing.  In the future we can decide if keywords will actually be
     # required.
@@ -124,3 +128,10 @@ class CreateTripForm(FlaskForm):
     location = StringField('Location', validators=[DataRequired()])
     picture = FileField('Upload Trip Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Create Trip')
+
+
+class RatingForm(FlaskForm):
+    star_rating = SelectField('Your Rating',
+                              choices=[(0, 'Select'), (1, '1 - Very Bad'), (2, '2 - Bad'), (3, '3 - Average'),
+                                       (4, '4 - Good'), (5, '5 - Very Good')], coerce=int)
+    submit = SubmitField('Submit')

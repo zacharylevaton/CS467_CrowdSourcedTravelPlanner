@@ -4,9 +4,10 @@
     <div class="row">
         <!-- Trip information -->
         <div class="col-md-6 content-section">
-            <legend class="border-bottom mb-4">{{ trip_title }}</legend>
+            <legend class="border-bottom mb-4">{{ trip.title }}</legend>
+            <span hidden id="trip-id">{{ trip.id }}</span>
             <img class="img-rounded"
-                    src="{{ url_for('static', filename='trip_pics/' + trip_image) }}">
+                    src="{{ url_for('static', filename='trip_pics/' + trip.image_file) }}">
         </div>
 
         <!-- Buffer -->
@@ -56,7 +57,34 @@
         <!-- Trip experiences -->
         <div class="col-md-6 content-section" id="trip-experiences-div">
             <legend class="border-bottom mb-4">Trip Experiences</legend>
-
+            {% for exp_id, experience in added_experiences.items() %}
+                <article class="media content-section exp-{{ experience.id }}">
+                    <div class="media-body">
+                        <!-- Title + Creator info -->
+                        <h2>
+                            <a class="article-title text-decoration-none"
+                               href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a>
+                        </h2>
+                        <h5>
+                            Created by user {{ experience.author.username }}
+                        </h5>
+                        <h6 id="exp-{{ experience.id }}-location">
+                            {{ experience.location }}
+                        </h6>
+                        <!-- Display Experience image -->
+                        <a href="{{ url_for('experience', experience_id=experience.id) }}">
+                            <img class="img-rounded"
+                                 src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
+                        </a>
+                        <!-- Add to trip -->
+                        <div class="col text-center">
+                            <button type="button" class="btn btn-danger remove-exp-button" id="exp-{{ experience.id }}">
+                                Remove from Trip
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
         </div>
 
         <!-- Buffer -->
@@ -77,32 +105,34 @@
                 <p>No results found.</p>
             {% else %}
                 {% for experience in experiences.items %}
-                    <article class="media content-section exp-{{ experience.id }}">
-                        <div class="media-body">
-                            <!-- Title + Creator info -->
-                            <h2>
-                                <a class="article-title text-decoration-none"
-                                   href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a>
-                            </h2>
-                            <h5>
-                                Created by user {{ experience.author.username }}
-                            </h5>
-                            <h6 id="exp-{{ experience.id }}-location">
-                                {{ experience.location }}
-                            </h6>
-                            <!-- Display Experience image -->
-                            <a href="{{ url_for('experience', experience_id=experience.id) }}">
-                                <img class="img-rounded"
-                                     src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
-                            </a>
-                            <!-- Add to trip -->
-                            <div class="col text-center">
-                                <button type="button" class="btn btn-primary add-exp-button" id="exp-{{ experience.id }}">
-                                    Add to Trip
-                                </button>
+                    {% if experience.id not in added_experiences %}
+                        <article class="media content-section exp-{{ experience.id }}">
+                            <div class="media-body">
+                                <!-- Title + Creator info -->
+                                <h2>
+                                    <a class="article-title text-decoration-none"
+                                       href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a>
+                                </h2>
+                                <h5>
+                                    Created by user {{ experience.author.username }}
+                                </h5>
+                                <h6 id="exp-{{ experience.id }}-location">
+                                    {{ experience.location }}
+                                </h6>
+                                <!-- Display Experience image -->
+                                <a href="{{ url_for('experience', experience_id=experience.id) }}">
+                                    <img class="img-rounded"
+                                         src="{{ url_for('static', filename='experience_pics/' + experience.image_file) }}">
+                                </a>
+                                <!-- Add to trip -->
+                                <div class="col text-center">
+                                    <button type="button" class="btn btn-primary add-exp-button" id="exp-{{ experience.id }}">
+                                        Add to Trip
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </article>
+                        </article>
+                    {% endif %}
                 {% endfor %}
             {% endif %}
         </div>

@@ -2,13 +2,23 @@
 
 {% block content %}
     <div class="content-section">
-      <div class="media">
-        <img class="rounded-circle account-img" src="{{ image_file }}">
-        <div class="media-body">
-          <h2 class="account-heading">{{ current_user.username }}</h2>
-          <p class="text-secondary">{{ current_user.email }}</p>
-        </div>
-      </div>
+        <!-- User header information -->
+        <ul>
+            <li style="display:inline-block;">
+                <!-- Display user account image with link to User Experiences page -->
+                <a href="{{ url_for('user_experiences', username=current_user.username) }}">
+                    <img class="rounded-circle article-img"
+                         src="{{ url_for('static', filename='profile_pics/' + current_user.image_file) }}">
+                </a>
+            </li>
+            <li style="display:inline-block;">
+                <a class="mr-2 text-decoration-none"
+                   href="{{ url_for('user_experiences', username=current_user.username) }}">{{ current_user.username }}</a>
+            </li>
+            <li style="display:inline-block; padding-left: 20px;">
+                <p class="text-secondary">{{ current_user.email }}</p>
+            </li>
+        </ul>
         <form method="POST" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
@@ -56,13 +66,21 @@
                 </div>
                 <!-- Landing Page sorting options -->
                 <div class="form-group pt-3">
-                    {{ form.sort.label(class="form-control-label") }}
+                    <p>Sorting Options for Landing Page</p>
                     {% for subfield in form.sort %}
                         <tr>
                             <td>{{ subfield }}</td>
                             <td>{{ subfield.label }}</td>
                         </tr>
                     {% endfor %}
+                </div>
+                <!-- Show preview of the user's current profile picture -->
+                <div class="pt-3">
+                    <p>Current Profile Picture</p>
+                </div>
+                <div id="user-uploaded-image">
+                    <img class="img-rounded"
+                         src="{{ image_file }}">
                 </div>
                 <!-- Update profile picture/change from default -->
                 <div class="form-group pt-3">
