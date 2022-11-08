@@ -43,10 +43,15 @@ $(document).ready(function () {
 
         // Clone the experience to my trip if it matches current search.
         var search_string = $('#search_string').val().toLowerCase();
-        var exp_location = $('#' + experience_identifier +'-location').text().toLowerCase();
-        if (search_string != "" && exp_location.indexOf(search_string) >= 0) {
-            experience_article.clone().appendTo(search_experience_container);
+        if ($('#search_type').val() == 'location') {
+            var exp_location = $('#' + experience_identifier +'-location').text().toLowerCase();
+            if (search_string != "" && exp_location.indexOf(search_string) >= 0) {
+                experience_article.clone().appendTo(search_experience_container);
+            }
+        } else {
+            // TODO: Add functionality when keyword search is used.
         }
+
 
         // Remove the experience from search.
         experience_article.remove();
