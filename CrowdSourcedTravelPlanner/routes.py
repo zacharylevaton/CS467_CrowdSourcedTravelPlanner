@@ -1,6 +1,6 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
 from flask import render_template, url_for, flash, redirect, request, abort
-from CrowdSourcedTravelPlanner.models import User, Experience, Keyword, Trip, TripExperience
+from CrowdSourcedTravelPlanner.models import User, Experience, Keyword, Trip, TripExperience, Rating
 from flask_login import login_user, current_user, logout_user, login_required
 from sqlalchemy import and_
 import os
@@ -8,6 +8,7 @@ import secrets
 from PIL import Image
 import requests
 import urllib.parse
+import folium
 
 
 # Landing page
@@ -29,14 +30,15 @@ def landing():
 
     # Check if user has set sort to "top-rated"
     if current_user.sort == 'top_rated':
-        experiences = Experience.query.order_by(Experience.rating.desc()).paginate(page=page, per_page=3)
+        experiences = Experience.query.order_by(Experience.avg_rating.desc()).paginate(page=page, per_page=3)
 
     # Check if user is logged in and set their location
     if current_user.is_authenticated and current_user.location != "":
         # Get all nearby experiences (under ~35 miles)
         nearby_experiences = Experience.query.filter(
             and_(Experience.longitude - current_user.longitude < 0.5, Experience.latitude - current_user.latitude < 0.5,
-                 current_user.longitude - Experience.longitude < 0.5, current_user.latitude - Experience.latitude < 0.5)).paginate(
+                 current_user.longitude - Experience.longitude < 0.5,
+                 current_user.latitude - Experience.latitude < 0.5)).paginate(
             page=nearby_page, per_page=3)
         return render_template('landing.html', experiences=experiences, nearby_experiences=nearby_experiences)
 
@@ -246,7 +248,7 @@ def add_experience():
 
         # Create a new Experience object and set the author to the current user
         experience = Experience(title=form.title.data, location=form.location.data, description=form.description.data,
-                                rating=form.rating.data, image_file=picture_file, author=current_user)
+                                image_file=picture_file, author=current_user)
 
         # Get the latitude and longitude of the address entered on the form
         geolocation = get_geolocation(experience.location)
@@ -263,6 +265,12 @@ def add_experience():
         for current_keyword in received_keywords:
             keyword_list.append(Keyword(keyword_text=current_keyword))
         experience.keywords = keyword_list
+
+        # Save the star rating for the Experience if the user has selected a score
+        star_rating = form.star_rating.data
+
+        if star_rating > 0:
+            experience.ratings.append(Rating(stars=star_rating, experience_id=experience.id, user_id=current_user.id))
 
         # Add the new Experience to the database
         db.session.add(experience)
@@ -277,10 +285,59 @@ def add_experience():
 
 
 # Experience Details page
-@app.route("/experience/<int:experience_id>")
+@app.route("/experience/<int:experience_id>", methods=['GET', 'POST'])
 def experience(experience_id):
     experience = Experience.query.get_or_404(experience_id)
-    return render_template('experience.html', title=experience.title, experience=experience)
+
+    # Generate Folium map. Code adapted from
+    # https://stackoverflow.com/questions/37379374/insert-the-folium-maps-into-the-jinja-template/60031784#60031784
+    folium_map = None
+    if experience.latitude != -200 and experience.longitude != -200:
+        start_coords = (experience.latitude, experience.longitude)
+        folium_map = folium.Map(location=start_coords, zoom_start=10)
+        popup = folium.Popup("<p><strong>" + experience.title + "</strong></p><p>" + experience.location + "</p>",
+                             max_width=300)
+        folium.Marker(location=start_coords, popup=popup, tooltip="Click for more information").add_to(folium_map)
+        folium_map.save('CrowdSourcedTravelPlanner/templates/map.html')
+
+    # Check if the logged-in user has already rated the Experience
+    if current_user.is_authenticated:
+        user_rating = Rating.query.filter_by(experience_id=experience.id, user_id=current_user.id).first()
+        if user_rating:
+            rating_form = forms.RatingForm(star_rating=user_rating.stars)
+        else:
+            rating_form = forms.RatingForm()
+    else:
+        rating_form = forms.RatingForm()
+
+    if rating_form.validate_on_submit():
+        star_rating = rating_form.star_rating.data
+
+        if user_rating:  # If the logged-in user is changing their previous rating for the Experience
+            # If the user picks "Select" from the dropdown, it signals that they are removing their rating.
+            if star_rating == 0:
+                db.session.delete(user_rating)  # Remove the user's rating so that it no longer affects the average
+            else:
+                user_rating.stars = star_rating  # Update the user's score for the Experience
+        # Otherwise, add the new rating to the list of ratings for the Experience
+        else:
+            experience.ratings.append(Rating(stars=star_rating, experience_id=experience.id, user_id=current_user.id))
+
+        # Save the changes to the database
+        db.session.commit()
+
+        # Flash a message indicating that the rating was saved
+        flash(f'Your rating was saved!', 'success')
+        return redirect(url_for('experience', experience_id=experience.id))
+
+    return render_template('experience.html', title=experience.title, experience=experience, rating_form=rating_form,
+                           folium_map=folium_map)
+
+
+# Folium map display
+@app.route('/map')
+def map():
+    return render_template('map.html')
 
 
 # Update Experience page
@@ -294,7 +351,16 @@ def update_experience(experience_id):
     if experience.author != current_user:
         abort(403)
 
-    form = forms.ExperienceForm()
+    # Check if the logged-in user has already rated the Experience
+    if current_user.is_authenticated:
+        user_rating = Rating.query.filter_by(experience_id=experience.id, user_id=current_user.id).first()
+        if user_rating:
+            form = forms.ExperienceForm(star_rating=user_rating.stars)
+        else:
+            form = forms.ExperienceForm()
+    else:
+        form = forms.ExperienceForm()
+    form.submit.label.text = 'Update'
 
     # Update the Experience details after form submission
     if form.validate_on_submit():
@@ -306,7 +372,6 @@ def update_experience(experience_id):
         experience.title = form.title.data
         experience.description = form.description.data
         experience.location = form.location.data
-        experience.rating = form.rating.data
 
         # Get the latitude and longitude of the address entered on the form
         geolocation = get_geolocation(experience.location)
@@ -324,6 +389,19 @@ def update_experience(experience_id):
             keyword_list.append(Keyword(keyword_text=current_keyword))
         experience.keywords = keyword_list
 
+        # Save the user's star rating for their Experience if they have selected one
+        star_rating = form.star_rating.data
+
+        if user_rating:  # If the logged-in user is changing their previous rating for the Experience
+            # If the user picks "Select" from the dropdown, it signals that they are removing their rating.
+            if star_rating == 0:
+                db.session.delete(user_rating)  # Remove the user's rating so that it no longer affects the average
+            else:
+                user_rating.stars = star_rating  # Update the user's score for the Experience
+        # Otherwise, add the new rating to the list of ratings for the Experience
+        else:
+            experience.ratings.append(Rating(stars=star_rating, experience_id=experience.id, user_id=current_user.id))
+
         # Save changes to the database
         db.session.commit()
         flash('Your Experience has been updated!', 'success')
@@ -333,7 +411,6 @@ def update_experience(experience_id):
         form.title.data = experience.title
         form.description.data = experience.description
         form.location.data = experience.location
-        form.rating.data = experience.rating
 
         # Pre-fill the "Keywords" field by concatenating any existing keywords into a single string
         display_list = []
@@ -385,6 +462,27 @@ def user_experiences(username):
 @app.route("/search", methods=['GET', 'POST'])
 def search():
     form = forms.SearchForm()
+
+    # Query the database for all Experiences with valid locations
+    map_experiences = Experience.query.filter(Experience.latitude != -200, Experience.longitude != -200).all()
+
+    # Populate world map with selectable markers for all found Experiences
+    folium_map = folium.Map(location=[0, 0], zoom_start=2)
+
+    for exp in map_experiences:
+        # Set details for each marker's location, popup, and tooltip text
+        exp_coords = (exp.latitude, exp.longitude)
+        popup_text = "<a href='" + url_for('experience', experience_id=exp.id) \
+                     + "' target='_blank' rel='noopener noreferrer'>" + exp.title + "</a><br><br>" + exp.location \
+                     + "<br><br><a href='" + url_for('experience', experience_id=exp.id) \
+                     + "' target='_blank' rel='noopener noreferrer'><img class='img-rounded' src='" \
+                     + url_for('static', filename='experience_pics/' + exp.image_file) + "' width='200'></a>"
+        popup = folium.Popup(popup_text, min_width=100, max_width=300)
+        tooltip = folium.Tooltip("<p><strong>" + exp.title + "</strong></p><p>" + exp.location
+                                 + "</p><p>Click for more information</p>")
+        folium.Marker(location=exp_coords, popup=popup, tooltip=tooltip).add_to(folium_map)
+
+    folium_map.save('CrowdSourcedTravelPlanner/templates/map.html')
 
     # Display results after submitting Search form
     if form.validate_on_submit():

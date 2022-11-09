@@ -53,8 +53,22 @@
                                     Latitude and Longitude not found for this location.
                                 {% endif %}
                             </dd>
-                            <dt class="col-sm-3">Rating</dt>
-                            <dd class="col-sm-9">{{ experience.rating }}</dd>
+                            <dt class="col-sm-3">Average Rating</dt>
+                            <dd class="col-sm-9">
+                                <!-- Show the average rating and star image -->
+                                {% if not experience.avg_rating %}
+                                    <p>This Experience has not yet been rated.</p>
+                                {% else %}
+                                    <ul>
+                                        <li style="display:inline-block;">
+                                            <img src="{{ url_for('static', filename='experience_pics/star.png') }}">
+                                        </li>
+                                        <li style="display:inline-block; margin-left: 5px;">
+                                            {{ experience.avg_rating|round(1) }} / 5
+                                        </li>
+                                    </ul>
+                                {% endif %}
+                            </dd>
                             <dt class="col-sm-3">Keywords</dt>
                             <dd class="col-sm-9">
                                 <!-- Display list of keywords -->

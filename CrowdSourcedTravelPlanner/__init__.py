@@ -2,14 +2,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from datetime import timedelta
 
 # App configuration
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'e801c73c9d2a7799c216c458ab9f6235'  # Used in preventing cross-site scripting attacks
-
-# Temporary SQLite database before we create the real DB for our project
-# "site.db" file created in either the main folder or  the "instance" folder if you're using a virtual Python
-# environment
+app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=1)  # Store "Remember Me" cookie for 24 hours
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
 

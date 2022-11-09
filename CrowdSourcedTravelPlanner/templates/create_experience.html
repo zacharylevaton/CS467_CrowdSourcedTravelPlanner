@@ -45,20 +45,7 @@
                         {{ form.location(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <div class="form-group pt-3 pb-4">
-                    {{ form.rating.label(class="form-control-label") }}
-                    {% if form.rating.errors %}
-                        {{ form.rating(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.rating.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        {{ form.rating(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-                <div class="form-group mb-3">
+                <div class="form-group mb-3 pt-3">
                     {{ form.keywords.label(class="form-control-label") }}
                     {% if form.keywords.errors %}
                         {{ form.keywords(class="form-control form-control-lg is-invalid") }}
@@ -71,12 +58,34 @@
                         {{ form.keywords(class="form-control form-control-lg") }}
                     {% endif %}
                 </div>
-                <!-- Show preview of the Experience's current image, or default image for the "Add Experience" page -->
-                {% if display_image == 'default.jpg' %}
-                    <p>Default Image</p>
-                {% endif %}
-                <img class="img-rounded"
-                 src="{{ url_for('static', filename='experience_pics/' + display_image) }}">
+                <!-- Rating selection dropdown -->
+                <div class="form-group mb-3 pt-1">
+                    <ul style="padding-left: 0px";>
+                        <li style="display:inline-block; padding-left: 0px;">
+                            {{ form.star_rating.label(class="form-control-label") }}:
+                        </li>
+                        <li style="display:inline-block; padding-left: 10px;">
+                            {% if form.star_rating.errors %}
+                                {{ form.star_rating(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.star_rating.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.star_rating(class="form-control") }}
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+                <!-- Show preview of the Experience's current image for the "Add Experience" page -->
+                <div>
+                    <p>Current Image</p>
+                </div>
+                <div id="user-uploaded-image">
+                    <img class="img-rounded"
+                        src="{{ url_for('static', filename='experience_pics/' + display_image) }}">
+                </div>
                 <!-- Upload a custom image for the Experience -->
                 <div class="form-group pt-3">
                     {{ form.picture.label() }}
