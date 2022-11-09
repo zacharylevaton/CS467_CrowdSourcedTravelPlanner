@@ -565,7 +565,7 @@ def delete_trip(trip_id):
     db.session.delete(trip)
     db.session.commit()
     flash('Your Trip has been deleted!', 'success')
-    return redirect(url_for('landing'))
+    return redirect(url_for('profile'))
 
 
 # User Trips page
