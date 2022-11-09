@@ -1,6 +1,6 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
 from flask import render_template, url_for, flash, redirect, request, abort
-from CrowdSourcedTravelPlanner.models import User, Experience, Keyword, Trip
+from CrowdSourcedTravelPlanner.models import User, Experience, Keyword, Trip, TripExperience
 from flask_login import login_user, current_user, logout_user, login_required
 from sqlalchemy import and_
 import os
@@ -420,6 +420,7 @@ def keyword(keyword_text):
         .paginate(page=page, per_page=5)
     return render_template('keyword.html', experiences=experiences, keyword_text=keyword_text)
 
+
 def save_trip_picture(form_picture):
     """Saves a user-uploaded image to the Trip pictures folder and gives it a random filename."""
     random_hex = secrets.token_hex(8)
@@ -438,11 +439,13 @@ def save_trip_picture(form_picture):
     # Return the filename of the newly saved image
     return picture_fn
 
+
 # Trip Details page
 @app.route("/trip/<int:trip_id>")
 def trip(trip_id):
     trip = Trip.query.get_or_404(trip_id)
     return render_template('trip.html', title=trip.title, trip=trip)
+
 
 # Create trip page.
 @app.route("/trip/create", methods=['GET', 'POST'])
@@ -474,18 +477,26 @@ def create_trip():
 
 # Update trip page.
 # TODO: Update route name dynamically with trip #
-@app.route("/trip/update", methods=['GET', 'POST'])
+@app.route("/trip/<int:trip_id>/update", methods=['POST'])
 @login_required
-def update_trip():
+def update_trip(trip_id):
     form = forms.SearchForm()
 
-    # TODO: Pull trip info from db.
-    trip_title, trip_image = 'My Trip to California', 'trip_default.jpg'
+    # Make sure only the Trip's author can update it.
+    trip = Trip.query.get_or_404(trip_id)
+    if trip.author != current_user:
+        abort(403)
+
+    # Find and extract all information for experiences already added to current trip.
+    trip_experience = TripExperience.query.filter_by(trip_id=trip_id)
+    added_experiences = dict()
+    for te in trip_experience:
+        added_experiences[te.exp_id] = Experience.query.get(te.exp_id)
 
     # Default values for form submittal.
-    experiences = search_type = search_string = None
+    search_type = search_string = experiences = None
 
-    if form.validate_on_submit():
+    if request.values and form.validate_on_submit():
         search_type = form.search_type.data
         search_string = form.search_string.data
 
@@ -493,7 +504,6 @@ def update_trip():
         page = request.args.get('page', 1, type=int)
 
         # Get Experience results depending on whether search is by location or keyword
-        # TODO: Filter search results based on experiences already added to trip.
         if search_type == 'location':
             experiences = Experience.query.filter(Experience.location.like('%' + search_string + '%')) \
                 .order_by(Experience.title) \
@@ -505,7 +515,39 @@ def update_trip():
                 .paginate(page=page, per_page=5)
 
     return render_template('update_trip.html', form=form, experiences=experiences, search_type=search_type,
-                           search_string=search_string, trip_title=trip_title, trip_image=trip_image)
+                           search_string=search_string, trip=trip, added_experiences=added_experiences)
+
+
+# Jquery POST route to add experience to trip.
+@app.route("/add_experience_to_trip", methods=['POST'])
+def add_experience_to_trip():
+    if request.form['expID'] and request.form['tripID']:
+        # Create a new Experience object and set the author to the current user.
+        trip_experience = TripExperience(exp_id=request.form['expID'], trip_id=request.form['tripID'])
+
+        # Add the new TripExperience relationship to the database.
+        db.session.add(trip_experience)
+        db.session.commit()
+
+        return "Success"
+    return "Failure"
+
+
+# Jquery POST route to delete experience from trip.
+@app.route("/delete_experience_from_trip", methods=['POST'])
+def delete_experience_from_trip():
+    if request.form['expID'] and request.form['tripID']:
+        # Create a new Experience object and set the author to the current user.
+        trip_experience = db.session.query(TripExperience).\
+            filter(TripExperience.exp_id == request.form['expID']).\
+            filter(TripExperience.trip_id == request.form['tripID']).one()
+
+        # Add the new TripExperience relationship to the database.
+        db.session.delete(trip_experience)
+        db.session.commit()
+
+        return "Success"
+    return "Failure"
 
 
 # Delete Trip button
@@ -523,7 +565,7 @@ def delete_trip(trip_id):
     db.session.delete(trip)
     db.session.commit()
     flash('Your Trip has been deleted!', 'success')
-    return redirect(url_for('landing'))
+    return redirect(url_for('profile'))
 
 
 # User Trips page

@@ -68,6 +68,7 @@ class Experience(db.Model):
     def __repr__(self):
         return f"Experience('{self.title}', '{self.date_posted}')"
 
+
 class Trip(db.Model):
     """
     Defines the database attributes for user-submitted Trips.
@@ -80,3 +81,15 @@ class Trip(db.Model):
 
     def __repr__(self):
         return f"Trip('{self.title}', '{self.location}', '{self.image_file}')"
+
+
+class TripExperience(db.Model):
+    """
+    Defines the database attributes for the cross-reference table for trips and experiences.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    exp_id = db.Column(db.Integer, db.ForeignKey('experience.id'), nullable=False)
+    trip_id = db.Column(db.Integer, db.ForeignKey('trip.id'), nullable=False)
+
+    def __repr__(self):
+        return f"TripExperience('{self.exp_id}', '{self.trip_id}')"
