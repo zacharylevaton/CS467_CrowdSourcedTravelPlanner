@@ -77,15 +77,20 @@
         {% endfor %}
         <!-- Pagination setup -->
         {% for nearby_page_num in nearby_experiences.iter_pages() %}
-            {% if nearby_page_num %}
-                {% if nearby_experiences.page == nearby_page_num %}
-                    <a class="btn btn-secondary mb-4" href="{{ url_for('landing', nearby_page=nearby_page_num) }}">{{ nearby_page_num }}</a>
+            {% for page_num in experiences.iter_pages() %}
+                {% if nearby_page_num %}
+                    {% if page_num == experiences.page %}
+                        {% if nearby_experiences.page == nearby_page_num %}
+                            <a class="btn btn-secondary mb-4" href="{{ url_for('landing', page=page_num, nearby_page=nearby_page_num) }}">{{ nearby_page_num }}</a>
+                        {% else %}
+                            <a class="btn btn-outline-secondary mb-4" href="{{ url_for('landing', page=page_num, nearby_page=nearby_page_num) }}">{{ nearby_page_num }}</a>
+                        {% endif %}
+                    {% else %}
+                    {% endif %}
                 {% else %}
-                    <a class="btn btn-outline-secondary mb-4" href="{{ url_for('landing', nearby_page=nearby_page_num) }}">{{ nearby_page_num }}</a>
+                    ...
                 {% endif %}
-            {% else %}
-                ...
-            {% endif %}
+            {% endfor %}
         {% endfor %}
     {% endif %}
     <!-- Display page title depending on sorting options -->
@@ -166,8 +171,27 @@
             </div>
         </article>
     {% endfor %}
-    <!-- Pagination setup -->
-    {% for page_num in experiences.iter_pages() %}
+    <!-- Pagination setup for logged in user -->
+    {% if current_user.is_authenticated and current_user.location != "" %}
+        {% for page_num in experiences.iter_pages() %}
+            {% for nearby_page_num in nearby_experiences.iter_pages() %}
+                {% if page_num %}
+                    {% if nearby_page_num == nearby_experiences.page %}
+                        {% if experiences.page == page_num %}
+                            <a class="btn btn-secondary mb-4" href="{{ url_for('landing', page=page_num, nearby_page=nearby_page_num) }}">{{ page_num }}</a>
+                        {% else %}
+                            <a class="btn btn-outline-secondary mb-4" href="{{ url_for('landing', page=page_num, nearby_page=nearby_page_num) }}">{{ page_num }}</a>
+                        {% endif %}
+                    {% else %}
+                    {% endif %}
+                {% else %}
+                    ...
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    <!-- Pagination setup for logged out user -->
+    {% else %}
+        {% for page_num in experiences.iter_pages() %}
         {% if page_num %}
             {% if experiences.page == page_num %}
                 <a class="btn btn-secondary mb-4" href="{{ url_for('landing', page=page_num) }}">{{ page_num }}</a>
@@ -177,5 +201,6 @@
         {% else %}
             ...
         {% endif %}
-    {% endfor %}
+        {% endfor %}
+    {% endif %}
 {% endblock content %}}
