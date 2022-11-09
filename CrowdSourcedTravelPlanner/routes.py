@@ -118,14 +118,19 @@ def logout():
 @app.route("/profile")
 @login_required
 def profile():
+    # Set page number for pagination
+    experience_page = request.args.get('experience_page', 1, type=int)    
+    trip_page = request.args.get('trip_page', 1, type=int)
+
     # Get all the experiences created by the currently logged-in user
-    experiences = Experience.query.filter(Experience.author == current_user)
-    exp_count = experiences.count()
+    experiences = Experience.query.filter(Experience.author == current_user).paginate(page=experience_page, per_page=3)
+    experiences_query = Experience.query.filter(Experience.author == current_user)
+    exp_count = experiences_query.count()
 
     # Get all trips created by the currently logged-in user
-    # TODO: Query all trips associated with user and update trip count.
-    trips = Trip.query.filter(Trip.author == current_user)
-    trip_count = trips.count()
+    trips = Trip.query.filter(Trip.author == current_user).paginate(page=trip_page, per_page=3)
+    trips_query = Trip.query.filter(Trip.author == current_user)
+    trip_count = trips_query.count()
 
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
     return render_template('profile.html', title='My Profile', image_file=image_file, experiences=experiences,
