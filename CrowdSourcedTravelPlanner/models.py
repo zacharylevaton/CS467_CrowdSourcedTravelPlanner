@@ -1,6 +1,7 @@
 from datetime import datetime
 from CrowdSourcedTravelPlanner import db, login_manager
 from flask_login import UserMixin
+from sqlalchemy_utils import aggregated
 
 
 @login_manager.user_loader
@@ -25,8 +26,8 @@ class User(db.Model, UserMixin):
     experiences = db.relationship('Experience', backref='author', lazy=True)
     trips = db.relationship('Trip', backref='author', lazy=True)
     location = db.Column(db.String(100), nullable=True, default="")
-    latitude = db.Column(db.Float, nullable=True)  # Temporarily nullable for now while I'm testing
-    longitude = db.Column(db.Float, nullable=True)  # Re-evaluate later
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     sort = db.Column(db.String(20), nullable=True, default='recent')
 
     def __repr__(self):
@@ -57,13 +58,19 @@ class Experience(db.Model):
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     location = db.Column(db.String(100), nullable=False)
-    rating = db.Column(db.Float, nullable=False)
     date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    latitude = db.Column(db.Float, nullable=True)  # Temporarily nullable for now while I'm testing
-    longitude = db.Column(db.Float, nullable=True)  # Re-evaluate later
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
     keywords = db.relationship('Keyword', order_by=Keyword.id, back_populates='experience')
+
+    # Average rating attribute code adapted from https://sqlalchemy-utils.readthedocs.io/en/latest/aggregates.html.
+    @aggregated('ratings', db.Column(db.Numeric))
+    def avg_rating(self):
+        return db.func.avg(Rating.stars)
+
+    ratings = db.relationship("Rating")
 
     def __repr__(self):
         return f"Experience('{self.title}', '{self.date_posted}')"
@@ -93,3 +100,18 @@ class TripExperience(db.Model):
 
     def __repr__(self):
         return f"TripExperience('{self.exp_id}', '{self.trip_id}')"
+
+
+class Rating(db.Model):
+    """
+    Defines the database attributes for a user's rating of an Experience.  Used to calculate the average rating of the
+    Experience.  Code adapted from https://sqlalchemy-utils.readthedocs.io/en/latest/aggregates.html.
+    """
+    __tablename__ = 'rating'
+    id = db.Column(db.Integer, primary_key=True)
+    stars = db.Column(db.Integer)   # Star rating entered in the form on the Experience Details page
+    experience_id = db.Column(db.Integer, db.ForeignKey('experience.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))   # Database ID of currently logged-in user
+
+    def __repr__(self):
+        return f"Rating('Experience: {self.experience_id}', 'User: {self.user_id}', 'Stars: {self.stars}')"

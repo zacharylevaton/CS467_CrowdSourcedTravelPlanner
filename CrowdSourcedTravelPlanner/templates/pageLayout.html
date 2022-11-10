@@ -144,7 +144,7 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
-    {% if request.endpoint in ['create_trip'] %}
+    {% if request.endpoint in ['create_trip', 'add_experience', 'update_experience', 'account'] %}
         <script src="{{ url_for('static', filename='user-uploaded-image-update.js') }}"></script>
     {% elif request.endpoint in ['update_trip'] %}
         <script src="{{ url_for('static', filename='update_trip.js') }}"></script>

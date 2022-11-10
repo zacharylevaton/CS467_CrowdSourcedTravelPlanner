@@ -50,8 +50,50 @@
                             Latitude and Longitude not found for this location.
                         {% endif %}
                     </dd>
-                    <dt class="col-sm-3">Rating</dt>
-                    <dd class="col-sm-9">{{ experience.rating }}</dd>
+                    <!-- Average Rating display -->
+                    <dt class="col-sm-3">Average Rating</dt>
+                    <dd class="col-sm-9">
+                        <!-- Show the average rating and star image -->
+                        {% if not experience.avg_rating %}
+                            <p>This Experience has not yet been rated.</p>
+                        {% else %}
+                            <ul>
+                                <li style="display:inline-block;">
+                                    <img src="{{ url_for('static', filename='experience_pics/star.png') }}">
+                                </li>
+                                <li style="display:inline-block; margin-left: 5px;">
+                                    {{ experience.avg_rating|round(1) }} / 5
+                                </li>
+                            </ul>
+                        {% endif %}
+                        <!-- Show rating select form only if the user is currently logged in -->
+                        {% if current_user.is_authenticated %}
+                            <form method="POST" action="">
+                                {{ rating_form.hidden_tag() }}
+                                <ul>
+                                    <li style="display:inline-block; padding-left: 0px;">
+                                        {{ rating_form.star_rating.label(class="form-control-label") }}:
+                                    </li>
+                                    <li style="display:inline-block; padding-left: 10px;">
+                                        {% if rating_form.star_rating.errors %}
+                                            {{ rating_form.star_rating(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in rating_form.star_rating.errors %}
+                                                    <span>{{ error }}</span>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ rating_form.star_rating(class="form-control") }}
+                                        {% endif %}
+                                    </li>
+                                    <li style="display:inline-block; padding-left: 10px;">
+                                        {{ rating_form.submit(class="btn btn-outline-secondary mb-2") }}
+                                    </li>
+                                </ul>
+                            </form>
+                        {% endif %}
+                    </dd>
+                    <!-- Keywords List -->
                     <dt class="col-sm-3">Keywords</dt>
                     <dd class="col-sm-9">
                         <!-- Display list of keywords -->
@@ -76,6 +118,12 @@
                         {% endif %}
                     </dd>
                 </dl>
+            </div>
+            <!-- Folium map -->
+            <div>
+                {% if folium_map %}
+                    <iframe class="map", src="/map" width="600" height="600"></iframe>
+                {% endif %}
             </div>
         </div>
     </article>
