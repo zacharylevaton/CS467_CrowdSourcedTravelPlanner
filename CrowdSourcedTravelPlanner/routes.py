@@ -10,6 +10,14 @@ import requests
 import urllib.parse
 import folium
 
+# Context processor passes data to the page layout template
+@app.context_processor
+def inject_data():
+    trip_data = Trip.query.order_by(Trip.title.asc()).all()
+    trip_data_count = Trip.query.count()
+    experience_data = Experience.query.order_by(Experience.title.asc()).all()
+    exp_data_count = Experience.query.count()
+    return dict(trip_data=trip_data, trip_data_count=trip_data_count, experience_data=experience_data, exp_data_count=exp_data_count)
 
 # Landing page
 @app.route('/')
