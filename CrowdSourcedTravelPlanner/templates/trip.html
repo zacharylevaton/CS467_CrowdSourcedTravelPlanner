@@ -37,7 +37,15 @@
                 <dl class="row">
                     <dt class="col-sm-3">Location</dt>
                     <dd class="col-sm-9">{{ trip.location }}</dd>
-                    </dd>
+                    {% for trip_experience in trip_experiences %}
+                        {% for experience in experiences %}
+                            {% if trip.id == trip_experience.trip_id and experience.id == trip_experience.exp_id %}
+                                <dt class="col-sm-3">Experience</dt>
+                                <dd class="col-sm-9"><a class="article-title text-decoration-none" href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a></dd>
+                            {% else %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
                 </dl>
             </div>
         </div>

@@ -555,7 +555,9 @@ def save_trip_picture(form_picture):
 @app.route("/trip/<int:trip_id>")
 def trip(trip_id):
     trip = Trip.query.get_or_404(trip_id)
-    return render_template('trip.html', title=trip.title, trip=trip)
+    experiences = Experience.query.all()
+    trip_experiences = TripExperience.query.all()
+    return render_template('trip.html', title=trip.title, trip=trip, experiences=experiences, trip_experiences=trip_experiences)
 
 
 # Create trip page.
