@@ -128,15 +128,32 @@
             <!-- Default sidebar from the Flask Tutorial video.  We can edit or remove it later. -->
             <div class="col-md-4">
                 <div class="content-section">
-                    <h3>Our Sidebar</h3>
-                    <p class='text-muted'>You can put any information here you'd like.
-                    <ul class="list-group">
-                        <li class="list-group-item list-group-item-light">Latest Posts</li>
-                        <li class="list-group-item list-group-item-light">Announcements</li>
-                        <li class="list-group-item list-group-item-light">Calendars</li>
-                        <li class="list-group-item list-group-item-light">etc</li>
-                    </ul>
-                    </p>
+                    <h3>Trips</h3>
+                    {% if trip_data_count == 0 %}
+                        <p class='text-muted'>No trips have been created.
+                    {% else %}
+                        <ul class="list-group">
+                            {% for trip in trip_data %}
+                                <li class="list-group-item list-group-item-light">
+                                    <a class="article-title text-decoration-none" href="{{ url_for('trip', trip_id=trip.id) }}">{{ trip.title }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        </p>                    
+                    {% endif %}
+                    <h3>Experiences</h3>
+                    {% if exp_data_count == 0 %}
+                        <p class='text-muted'>No experiences have been created.
+                    {% else %}
+                        <ul class="list-group">
+                            {% for experience in experience_data %}
+                                <li class="list-group-item list-group-item-light">
+                                    <a class="article-title text-decoration-none" href="{{ url_for('experience', experience_id=experience.id) }}">{{ experience.title }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        </p>                    
+                    {% endif %}
                 </div>
             </div>
         </div>
