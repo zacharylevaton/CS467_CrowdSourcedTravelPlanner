@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'e801c73c9d2a7799c216c458ab9f6235'  # Used in preventing cross-site scripting attacks
 app.config['REMEMBER_COOKIE_DURATION'] = timedelta(days=1)  # Store "Remember Me" cookie for 24 hours
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config['TEMPLATES_AUTO_RELOAD'] = True  # Workaround for making sure Folium maps load on Flip hosted website
 db = SQLAlchemy(app)
 
 bcrypt = Bcrypt(app)  # Used for hashing user passwords

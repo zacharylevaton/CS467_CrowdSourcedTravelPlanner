@@ -1,5 +1,5 @@
 from CrowdSourcedTravelPlanner import app, forms, db, bcrypt
-from flask import render_template, url_for, flash, redirect, request, abort
+from flask import render_template, url_for, flash, redirect, request, abort, make_response
 from CrowdSourcedTravelPlanner.models import User, Experience, Keyword, Trip, TripExperience, Rating
 from flask_login import login_user, current_user, logout_user, login_required
 from sqlalchemy import and_
@@ -10,6 +10,7 @@ import requests
 import urllib.parse
 import folium
 
+
 # Context processor passes data to the page layout template
 @app.context_processor
 def inject_data():
@@ -17,7 +18,9 @@ def inject_data():
     trip_data_count = Trip.query.count()
     experience_data = Experience.query.order_by(Experience.title.asc()).all()
     exp_data_count = Experience.query.count()
-    return dict(trip_data=trip_data, trip_data_count=trip_data_count, experience_data=experience_data, exp_data_count=exp_data_count)
+    return dict(trip_data=trip_data, trip_data_count=trip_data_count, experience_data=experience_data,
+                exp_data_count=exp_data_count)
+
 
 # Landing page
 @app.route('/')
@@ -129,7 +132,7 @@ def logout():
 @login_required
 def profile():
     # Set page number for pagination
-    experience_page = request.args.get('experience_page', 1, type=int)    
+    experience_page = request.args.get('experience_page', 1, type=int)
     trip_page = request.args.get('trip_page', 1, type=int)
 
     # Get all the experiences created by the currently logged-in user
@@ -555,9 +558,15 @@ def save_trip_picture(form_picture):
 @app.route("/trip/<int:trip_id>")
 def trip(trip_id):
     trip = Trip.query.get_or_404(trip_id)
-    experiences = Experience.query.all()
-    trip_experiences = TripExperience.query.all()
-    return render_template('trip.html', title=trip.title, trip=trip, experiences=experiences, trip_experiences=trip_experiences)
+
+    # Retrieve all Experiences contained within the Trip
+    trip_experiences = db.session.query(Experience, TripExperience).select_from(Experience).join(TripExperience). \
+        group_by(Experience.id).all()
+    experiences = []
+    for te in trip_experiences:
+        experiences.append(te[0])
+
+    return render_template('trip.html', title=trip.title, trip=trip, experiences=experiences)
 
 
 # Create trip page.
@@ -573,7 +582,7 @@ def create_trip():
             picture_file = save_trip_picture(form.picture.data)
         else:
             picture_file = 'trip_default.jpg'
-        
+
         trip = Trip(title=form.title.data, location=form.location.data, image_file=picture_file, author=current_user)
 
         # Add the new Trip to the database
@@ -589,7 +598,6 @@ def create_trip():
 
 
 # Update trip page.
-# TODO: Update route name dynamically with trip #
 @app.route("/trip/<int:trip_id>/update", methods=['POST'])
 @login_required
 def update_trip(trip_id):
@@ -651,8 +659,8 @@ def add_experience_to_trip():
 def delete_experience_from_trip():
     if request.form['expID'] and request.form['tripID']:
         # Create a new Experience object and set the author to the current user.
-        trip_experience = db.session.query(TripExperience).\
-            filter(TripExperience.exp_id == request.form['expID']).\
+        trip_experience = db.session.query(TripExperience). \
+            filter(TripExperience.exp_id == request.form['expID']). \
             filter(TripExperience.trip_id == request.form['tripID']).one()
 
         # Add the new TripExperience relationship to the database.
@@ -667,7 +675,6 @@ def delete_experience_from_trip():
 @app.route("/trip/<int:trip_id>/delete", methods=['POST'])
 @login_required
 def delete_trip(trip_id):
-    
     trip = Trip.query.get_or_404(trip_id)
 
     # Make sure only the Trip's author can delete it

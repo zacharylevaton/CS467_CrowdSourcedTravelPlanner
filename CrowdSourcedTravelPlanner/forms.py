@@ -111,8 +111,6 @@ class ExperienceForm(FlaskForm):
                               choices=[(0, 'Select'), (1, '1 - Very Bad'), (2, '2 - Bad'), (3, '3 - Average'),
                                        (4, '4 - Good'), (5, '5 - Very Good')], coerce=int)
 
-    # At least 1 keyword is required for now during testing.  In the future we can decide if keywords will actually be
-    # required.
     keywords = KeywordListField('Keywords (Please separate multiple keywords with commas)', validators=[DataRequired()])
     submit = SubmitField('Post')
 
